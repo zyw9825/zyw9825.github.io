@@ -47,6 +47,8 @@
             
             <tag> 数据结构 </tag>
             
+            <tag> 二叉树 </tag>
+            
         </tags>
       
     </entry>
@@ -96,8 +98,6 @@
         <tags>
             
             <tag> 数据结构 </tag>
-            
-            <tag> 二叉树 </tag>
             
         </tags>
       
@@ -175,6 +175,10 @@
         <tags>
             
             <tag> 计算机网络 </tag>
+            
+            <tag> IP </tag>
+            
+            <tag> TCP </tag>
             
         </tags>
       
