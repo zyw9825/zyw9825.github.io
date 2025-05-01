@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"><title>代码手记 - 晃在云淡风轻</title><meta name="author" content="zyw9825"><meta name="copyright" content="zyw9825"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="你要发光，而不是被照亮">
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>代码手记 - 晃在云淡风轻</title><meta name="author" content="zyw9825"><meta name="copyright" content="zyw9825"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="你要发光，而不是被照亮">
 <meta property="og:type" content="website">
 <meta property="og:title" content="代码手记">
 <meta property="og:url" content="https://zyw9825.github.io/index.html">
@@ -8,31 +8,123 @@
 <meta property="og:image" content="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/20230408141525.jpg">
 <meta property="article:author" content="zyw9825">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/20230408141525.jpg"><link rel="shortcut icon" href="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/book.svg"><link rel="canonical" href="https://zyw9825.github.io/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>var _hmt = _hmt || [];
+<meta name="twitter:image" content="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/20230408141525.jpg"><link rel="shortcut icon" href="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/book.svg"><link rel="canonical" href="https://zyw9825.github.io/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>var _hmt = _hmt || [];
 (function() {
   var hm = document.createElement("script");
   hm.src = "https://hm.baidu.com/hm.js?08ead5bb7d005bd4116f0ec90195f830";
-  var s = document.getElementsByTagName("script")[0]; 
+  var s = document.getElementsByTagName("script")[0];
   s.parentNode.insertBefore(hm, s);
 })();
-</script><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web&amp;display=swap" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+btf.addGlobalFn('pjaxComplete', () => {
+  _hmt.push(['_trackPageview',window.location.pathname])
+}, 'baidu_analytics')
+</script><script>const GLOBAL_CONFIG = {
   root: '/',
   algolia: undefined,
-  localSearch: {"path":"/search.xml","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  localSearch: undefined,
   translate: undefined,
-  noticeOutdate: undefined,
-  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":200},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
   copy: {
     success: '复制成功',
-    error: '复制错误',
+    error: '复制失败',
     noSupport: '浏览器不支持'
   },
   relativeDate: {
     homepage: false,
     post: false
   },
-  runtime: '天',
-  date_suffix: {
+  runtime: '',
+  dateSuffix: {
     just: '刚刚',
     min: '分钟前',
     hour: '小时前',
@@ -40,379 +132,62 @@
     month: '个月前'
   },
   copyright: undefined,
-  lightbox: 'fancybox',
+  lightbox: 'null',
   Snackbar: undefined,
-  source: {
-    justifiedGallery: {
-      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
-      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
-    }
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
   },
   isPhotoFigcaption: false,
-  islazyload: false,
+  islazyloadPlugin: false,
   isAnchor: false,
   percent: {
     toc: true,
     rightside: true,
-  }
+  },
+  autoDarkmode: false
 }</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
   title: '代码手记',
-  isPost: false,
-  isHome: true,
   isHighlightShrink: false,
   isToc: false,
-  postUpdate: '2025-04-18 11:52:11'
-}</script><noscript><style type="text/css">
-  #nav {
-    opacity: 1
-  }
-  .justified-gallery img {
-    opacity: 1
-  }
-
-  #recent-posts time,
-  #post-meta time {
-    display: inline !important
-  }
-</style></noscript><script>(win=>{
-    win.saveToLocal = {
-      set: function setWithExpiry(key, value, ttl) {
-        if (ttl === 0) return
-        const now = new Date()
-        const expiryDay = ttl * 86400000
-        const item = {
-          value: value,
-          expiry: now.getTime() + expiryDay,
-        }
-        localStorage.setItem(key, JSON.stringify(item))
-      },
-
-      get: function getWithExpiry(key) {
-        const itemStr = localStorage.getItem(key)
-
-        if (!itemStr) {
-          return undefined
-        }
-        const item = JSON.parse(itemStr)
-        const now = new Date()
-
-        if (now.getTime() > item.expiry) {
-          localStorage.removeItem(key)
-          return undefined
-        }
-        return item.value
-      }
-    }
-  
-    win.getScript = url => new Promise((resolve, reject) => {
-      const script = document.createElement('script')
-      script.src = url
-      script.async = true
-      script.onerror = reject
-      script.onload = script.onreadystatechange = function() {
-        const loadState = this.readyState
-        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
-        script.onload = script.onreadystatechange = null
-        resolve()
-      }
-      document.head.appendChild(script)
-    })
-  
-    win.getCSS = (url,id = false) => new Promise((resolve, reject) => {
-      const link = document.createElement('link')
-      link.rel = 'stylesheet'
-      link.href = url
-      if (id) link.id = id
-      link.onerror = reject
-      link.onload = link.onreadystatechange = function() {
-        const loadState = this.readyState
-        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
-        link.onload = link.onreadystatechange = null
-        resolve()
-      }
-      document.head.appendChild(link)
-    })
-  
-      win.activateDarkMode = function () {
-        document.documentElement.setAttribute('data-theme', 'dark')
-        if (document.querySelector('meta[name="theme-color"]') !== null) {
-          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
-        }
-      }
-      win.activateLightMode = function () {
-        document.documentElement.setAttribute('data-theme', 'light')
-        if (document.querySelector('meta[name="theme-color"]') !== null) {
-          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
-        }
-      }
-      const t = saveToLocal.get('theme')
-    
-          if (t === 'dark') activateDarkMode()
-          else if (t === 'light') activateLightMode()
-        
-      const asideStatus = saveToLocal.get('aside-status')
-      if (asideStatus !== undefined) {
-        if (asideStatus === 'hide') {
-          document.documentElement.classList.add('hide-aside')
-        } else {
-          document.documentElement.classList.remove('hide-aside')
-        }
-      }
-    
-    const detectApple = () => {
-      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
-        document.documentElement.classList.add('apple')
-      }
-    }
-    detectApple()
-    })(window)</script><link rel="stylesheet" href="/css/custom.css"  media="defer" onload="this.media='all'"><meta name="generator" content="Hexo 7.3.0"></head><body><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pace-js/themes/blue/pace-theme-minimal.min.css"/><script src="https://cdn.jsdelivr.net/npm/pace-js/pace.min.js"></script><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/20230408141525.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">10</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">9</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/message/"><i class="fa-fw far fa-comment"></i><span> 留言板</span></a></div></div></div></div><div class="page" id="body-wrap"><header class="full_page" id="page-header" style="background-image: url('https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/20230409115434.jpg')"><nav id="nav"><span id="blog-info"><a href="/" title="代码手记"><span class="site-name">代码手记</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/message/"><i class="fa-fw far fa-comment"></i><span> 留言板</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="site-info"><h1 id="site-title">代码手记</h1><div id="site-subtitle"><span id="subtitle"></span></div><div id="site_social_icons"><a class="social-icon" href="https://github.com/zyw9825" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:zyw_9825@163.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="tencent://AddContact/?fromId=45&amp;fromSubId=1&amp;subcmd=all&amp;uin=765830653&amp;website=www.oicqzone.com" target="_blank" title="添加QQ好友"><i class="fa-brands fa-qq"></i></a></div></div><div id="scroll-down"><i class="fas fa-angle-down scroll-down-effects"></i></div></header><main class="layout" id="content-inner"><div class="recent-posts" id="recent-posts"><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2023/04/08/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" title="计算机网络基础知识总结">计算机网络基础知识总结</a><div class="article-meta-wrap"><span class="article-meta"><i class="fas fa-thumbtack sticky"></i><span class="sticky">置顶</span><span class="article-meta-separator">|</span></span><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2023-04-07T16:00:00.000Z" title="发表于 2023-04-08 00:00:00">2023-04-08</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/">计算机网络</a></span></div><div class="content">第 1 章概述
-1.1 计算机网络在信息时代中的作用
-
-21 世纪的一些重要特征就是数字化、网络化和信息化，它是一个以网络为核心的信息时代。
-网络是指“三网”，即电信网络、有线电视网络和计算机网络。
-“三网融合”：随着技术的发展，电信网络和有线电视网络都逐渐融入了现代计算机网络的技术。
-计算机网络向用户提供的最重要的功能：
-
-连通性——计算机网络使上网用户之间都可以交换信息，好像这些用户的计算机都可以彼此直接连通一样。
-共享——即资源共享。可以是信息共享、软件共享，也可以是硬件共享。
-
-
-
-1.2 因特网概述
-
-
-网络 (network)由若干结点 (node)和连接这些结点的链路 (link)组成。 
-
-网络中的结点可以说计算机、集线器、交换机或路由器等。
-
-
-
-互联网是“网络的网络”(network of networks)。
-
-
-因特网是世界上最大的互连网络。
-
-
-连接在因特网上的计算机都称为主机 (host)。
-
-
- 网络把许多计算机连接在一起，而因特网把许多网路连接在一起。
-
-
-因特网发展的三个阶段：
-
-第一阶段是从单个网络 ARPANET 向互联网发展的过程。
-第二阶段：建 ...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2025/04/15/%E7%AE%97%E6%B3%95/%E5%9F%BA%E7%A1%80%E6%9A%B4%E5%8A%9B%E7%AE%97%E6%B3%95/" title="基础暴力算法">基础暴力算法</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2025-04-15T03:39:06.386Z" title="发表于 2025-04-15 11:39:06">2025-04-15</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E7%AE%97%E6%B3%95/">算法</a></span></div><div class="content">线性枚举
-线性枚举（Linear Enumeration）是一种暴力枚举的方法，它逐一检查每个可能的解，适用于搜索和枚举问题。
-其核心思路是：对问题的所有可能情况逐一进行遍历，并针对每种情况判断是否满足条件，从而得到解答。
-线性枚举是一种顺序搜索算法，从线性表的第一个元素开始，根据特定的判断条件，做出相应的行为。变种比较多，最常见的就是求最值、求和等等。比如：
-
-
-求最大值，伪代码
-12345最大值 = 非常小的数for 当前元素 in 给定的线性表:    if 当前元素 &gt; 最大值:        最大值 = 当前元素返回 最大值 的值
-
-
-求和，伪代码
-1234求和 = 0for 当前元素 in 给定的线性表:    求和 = 求和 + 当前元素返回 求和 的值
-
-
-时间复杂度
-线性枚举需要遍历列表中的每个元素。
-线性枚举的时间复杂度为 O (nm)，其中 n 是线性表的长度，m 是每次操作的量级。
-对于求最大值和求和来说，因为操作比较简单，所以 m 为 1，则整体的时间复杂度是 O (n) 的。
-线性枚举是一种简单而有效的算法思想，它可以用于解决许多基本的算法问题。虽然它 ...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2023/04/23/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/CSAPP-1%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E6%BC%AB%E6%B8%B8/" title="CSAPP-1计算机系统漫游">CSAPP-1计算机系统漫游</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2023-04-22T18:10:33.000Z" title="发表于 2023-04-23 02:10:33">2023-04-23</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9FCSAPP/">深入理解计算机系统CSAPP</a></span></div><div class="content">课程资源汇总：
-
-CSAPP视频课
-课程网址
-书籍下载
-
-
-计算机系统漫游
-信息就是位+上下文
-
-
-hello.c
-123456#include &lt;stdio.h&gt;int main()&#123;    printf(&quot;hello, world\n&quot;);    return O;&#125;
-
-
-hello 程序的生命周期是从一个源程序（或者说源文件）开始的，即程序员通过编译器创建并保存的文本文件 hello.c。
-
-源程序实际上由 0 和 1 组成的比特序列，每 8 位称为一个字节。每个字节表示程序中的某些文本字符。
-大部分现代计算机系统都是用 ASCII 标准来表示文本字符，即用唯一的一个单字节大小（8bit）表示的整数来表示每一个字符。
-hello.c 程序以字节序列的方式存储在文件中。
-像 hello.c 这样只由 ASCII 字符构成的文件称为文本文件，其余的所有文件都称为二进制文件。
-计算机系统中的所有文件——包括磁盘文件、内存中的程序、内存中存放的用户数据以及网上传送的数据，都是由一串比特表示的。
-
-
-
-
-程序的编译过程
-
-
-为了能够在系统 ...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2023/04/20/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OSTEP-1%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E4%B8%8A%E7%9A%84%E7%A8%8B%E5%BA%8F/" title="OSTEP-1操作系统上的程序">OSTEP-1操作系统上的程序</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2023-04-20T14:12:13.000Z" title="发表于 2023-04-20 22:12:13">2023-04-20</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AF%BC%E8%AE%BAOSTEP/">操作系统导论OSTEP</a></span></div><div class="content">课程资源
-
-课程名称：《操作系统：设计与实现》（2022）——南京大学蒋炎岩老师
-
-
-课程网站
-课程视频
-课程教材
-课程作业
-
-
-读书笔记
-
-范围：
-
-第 1 章：Dialogue
-第 2 章：Introduction to Operating Systems
-
-
-
-Introduction
-
-
-当一个程序在运行时到底发生了什么？
-一个正在运行的程序只做一件非常简单的事情——执行指令：
-处理器每秒数百万次或上亿次地从内存中获取指令，对其进行解码（即找出这到底是哪条指令），然后执行之（访问内存、检查条件、跳转函数等）。这条指令执行结束后，处理器就继续抓取下一条指令。重复上述过程直到整个程序结束。
-
-
-什么是操作系统（OS）？
-操作系统是这样一个软件，它负责让程序运行变得更容易（甚至可以让你看起来同时运行很多程序），允许程序共享内存，允许程序与设备交互等等，它使得系统以易于使用的方式正确和有效地运行。
-操作系统 OS 早期被称作监督程序（Supervisor）或者主控制程序（Master Control Program）。
-
-
-什么是虚拟化（Virtualization）?
-操作系统主要通 ...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2023/04/09/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%85%AD%E2%80%94%E2%80%94%E5%9B%BE/" title="数据结构-6 图">数据结构-6 图</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2023-04-09T12:15:47.000Z" title="发表于 2023-04-09 20:15:47">2023-04-09</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">数据结构</a></span></div><div class="content">图的存储结构
-图的顺序存储结构——邻接矩阵
-12345678910typedef struct &#123;		int no;							//顶点编号，表示它的位置	char info;						//顶点的其他辅助信息，没有的话可以删除&#125;VertexType;	 //顶点		typedef struct&#123;			int edges[maxSize][maxSize];	//顶点之间的相邻关系（无权值：1表示相通，0表示不相通）（有权值：∞表示不相通，其它为权值）	int vexnum, arcnum;				//总顶点数和总边数	VertexType vex[maxSize];		//存放图中的所有顶点&#125;MGraph;		//图
-图的链式存储结构——邻接链表
-123456789101112131415161718//边——结点typedef struct ArcNode &#123;	int adjvex;					//该边所指顶点的位置	struct ArcNode *nextArc;	//指向下一条边的指针	int info;					//边的补充信 ...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2023/04/09/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%BA%94%E2%80%94%E2%80%94%E6%A0%91%E4%B8%8E%E4%BA%8C%E5%8F%89%E6%A0%91/" title="数据结构-5 树与二叉树">数据结构-5 树与二叉树</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2023-04-09T12:14:47.000Z" title="发表于 2023-04-09 20:14:47">2023-04-09</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">数据结构</a></span></div><div class="content">树的基本概念
-
-结点：结点不仅包含数据元素，而且包含指向子树的指针
-结点的度：结点拥有的子树个数或者分支的个数。
-树的度：树中各结点度的最大值。
-叶子结点：又叫作终端结点，指度为0的结点
-孩子：结点的子树的根结点。
-双亲：与孩子的定义相对应。A是B的孩子，那么B就是A的双亲。
-兄弟：同一 个双亲的孩子之间互为兄弟。
-祖先：从根到某结点的路径上的所有结点，都是这个结点的祖先。
-树的高度（或者深度）：树中结点的最大层次。
-结点的深度：从根结点到该结点的路径上的结点个数。
-结点的高度：从某结点往下走可能到达多个叶子结点，对应了多条通往这些叶子结点的路径，其中最长的那条路径上结点的个数。
-
-树的存储结构
-
-
-顺序存储结构：双亲存储结构
-用一维数组即可实现：用数组下标表示树中的结点，数组元素的内容表示该结点的双亲结点，这样有了结点（下标）以及结点之间的关系（内容），就可以表示一 棵树了。
-
-
-
-链式存储结构：
-
-
-孩子存储结构：即将每个结点的所有孩子结点都用单链表链接起来形成一个线性结构，此时n个结点就有n个孩子链表。
-
-
-孩子兄弟存储结构：又称二叉树表示法，即以二叉链表作为树的存储结构。
-每个 ...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2023/04/09/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%9B%9B%E2%80%94%E2%80%94%E6%95%B0%E7%BB%84%E3%80%81%E7%9F%A9%E9%98%B5%E4%B8%8E%E5%B9%BF%E4%B9%89%E8%A1%A8/" title="数据结构-4 数组、矩阵与广义表">数据结构-4 数组、矩阵与广义表</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2023-04-09T12:13:47.000Z" title="发表于 2023-04-09 20:13:47">2023-04-09</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">数据结构</a></span></div><div class="content">数组
-
-
-二维数组是元素为一元数组的一维数组。
-
-
-数组一般采取顺序存储，最常见的两种操作是查找与修改。
-
-
-二维数组元素的位置计算问题：假设有二维数组a[m][n]，数组从a[0][0]开始存储，问a[i][j]是数组中第几个元素？
-分析：m表示a的行数，n表示a的列数，且每行有n个元素，每列有m个元素。
-a[i][j]表示的是数组a中第i+1行第j+1个元素，那么：
-
-行优先：a[i][j]前面有i行，那么a[i][j]前面就有i*n+j个元素，则a[i][j]就是第i*n+j+1个元素
-列优先：a[i][j]前面有j列，那么a[i][j]前面就有j*m+i个元素，则a[i][j]就是第j*m+i+1个元素
-
-
-
-矩阵的压缩存储
-矩阵
-Amn即为一个矩阵的逻辑表示，在数据结构中，可以用一个二维数组来存储。
-
-
-矩阵的转置
-对于一个m×n的矩阵A[m][n]，其转置矩阵是一个n×m的矩阵B[n][m]，且有B[i][j]=A[j][i]，0&lt;=i&lt;n，0&lt;=j&lt;m。
-1234567891011121314//矩阵转置//二维数组统一设定成maxSize*max ...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2023/04/09/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%89%E2%80%94%E2%80%94%E4%B8%B2/" title="数据结构-3 串">数据结构-3 串</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2023-04-09T12:12:47.000Z" title="发表于 2023-04-09 20:12:47">2023-04-09</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">数据结构</a></span></div><div class="content">串数据类型的定义
-串的定义
-
-串是由0个或多个字符组成的有限序列。
-串中字符的个数称为串的长度，0个字符的串称为空串。
-串中任意连续的字符组成的子序列称为子串，包含子串的串称为主串。
-串是一种限定元素为字符的线性表。
-串与线性表最大的区别是操作集不同，线性表主要是针对某一元素操作，而串则主要针对子串操作。
-
-串的存储结构
-
-定长顺序存储表示
-
-1234typedef struct Str&#123;    char str[maxSize+1];	//maxSize为已定义的常量，表示串的最大长度。+1是以为多出一个结束标记`\0`    int length;&#125;Str;
-虽然多了一个结束标记’\0’，但是计算长度length时并不纳入计算范围。
-
-变长分配存储表示（动态分配存储表示）
-
-1234typedef struct Str&#123;    char *ch;	//指向动态分配存储空间首地址的字符指针    int length;&#125;Str;
-使用动态分配时，需要使用malloc()函数来分配一个长度为length，类型为char的连续存储空间：str.ch ...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2023/04/09/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%BA%8C%E2%80%94%E2%80%94%E6%A0%88%E4%B8%8E%E9%98%9F%E5%88%97/" title="数据结构-2 栈与队列">数据结构-2 栈与队列</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2023-04-09T12:11:47.000Z" title="发表于 2023-04-09 20:11:47">2023-04-09</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">数据结构</a></span></div><div class="content">栈与队列
-结构体定义
-
-顺序栈定义
-
-1234typedef struct&#123;    int data[maxSize];    int top;&#125;SqStack;
-
-链栈结点定义
-
-1234typedef struct LNode&#123;    int data;    struct LNode *next;&#125;LNode;
-
-顺序队列定义
-
-12345typedef struct&#123;    int data[maxSize];    int front;    int rear;&#125;SqQueue;
-
-链队定义
-
-
-12345//队结点类型定义typedef struct QNode&#123;    int data;    struct QNode *next;&#125;QNode;
-12345//链队类型定义typedef struct&#123;    QNode *front;    QNode *rear;&#125;LiQueue;
-栈的应用
-顺序栈的应用
-
-C语言里算术表达式中的括号只有小括号。编写算法，判断一 个表达 ...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2023/04/09/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%80%E2%80%94%E2%80%94%E7%BA%BF%E6%80%A7%E8%A1%A8/" title="数据结构-1 线性表">数据结构-1 线性表</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2023-04-09T12:10:47.000Z" title="发表于 2023-04-09 20:10:47">2023-04-09</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">数据结构</a></span></div><div class="content">线性表的结构体定义与基本操作
-线性表的结构体定义
-
-顺序表的结构体定义
-
-一个顺序表中包含一个存储表中元素的数组data[]和一个指示元素个数的变量length：
-12345#define maxSize 100typedef struct&#123;	int data[maxSize]; // 默认int型，可换	int legth;&#125;Sqlist;
-简单写法：
-12int A[maxSize]int n;
-
-单链表的结点定义
-
-12345typedef struct LNode&#123;	int data; //数据域	struct LNode *next; //指向后继结点的指针&#125;LNode; //定义单链表结点类型
-
-双链表的结点定义
-
-123456typedef struct DLNode&#123;	int data;//数据域	struct DLNode *prior;//指向前驱结点的指针	struct DLNode *next; //指向后继结点的指针&#125;DLNode; //定义双链表结点类型
-顺序表的操作
-
-按元素值的查找算法
-
-123 ...</div></div></div><nav id="pagination"><div class="pagination"><span class="page-number current">1</span></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/20230408141525.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">zyw9825</div><div class="author-info__description">你且迷这风浪永远二十赶朝暮</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">10</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">9</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/zyw9825"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/zyw9825" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:zyw_9825@163.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="tencent://AddContact/?fromId=45&amp;fromSubId=1&amp;subcmd=all&amp;uin=765830653&amp;website=www.oicqzone.com" target="_blank" title="添加QQ好友"><i class="fa-brands fa-qq"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">个人邮箱：zyw_9825@163.com</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/04/15/%E7%AE%97%E6%B3%95/%E5%9F%BA%E7%A1%80%E6%9A%B4%E5%8A%9B%E7%AE%97%E6%B3%95/" title="基础暴力算法">基础暴力算法</a><time datetime="2025-04-15T03:39:06.386Z" title="发表于 2025-04-15 11:39:06">2025-04-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/04/23/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/CSAPP-1%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E6%BC%AB%E6%B8%B8/" title="CSAPP-1计算机系统漫游">CSAPP-1计算机系统漫游</a><time datetime="2023-04-22T18:10:33.000Z" title="发表于 2023-04-23 02:10:33">2023-04-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/04/20/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OSTEP-1%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E4%B8%8A%E7%9A%84%E7%A8%8B%E5%BA%8F/" title="OSTEP-1操作系统上的程序">OSTEP-1操作系统上的程序</a><time datetime="2023-04-20T14:12:13.000Z" title="发表于 2023-04-20 22:12:13">2023-04-20</time></div></div></div></div><div class="card-widget card-categories"><div class="item-headline">
+  pageType: 'home'
+}</script><link rel="stylesheet" href="/css/custom.css"  media="defer" onload="this.media='all'"><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/20230408141525.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">10</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">9</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/shuoshuo/"><i class="fa-fw fas fa-comments"></i><span> 说说</span></a></div><div class="menus_item"><a class="site-page" href="/message/"><i class="fa-fw far fa-comment"></i><span> 留言板</span></a></div></div></div></div><div class="page" id="body-wrap"><header class="full_page" id="page-header" style="background-image: url(https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/20230409115434.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">代码手记</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/shuoshuo/"><i class="fa-fw fas fa-comments"></i><span> 说说</span></a></div><div class="menus_item"><a class="site-page" href="/message/"><i class="fa-fw far fa-comment"></i><span> 留言板</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="site-info"><h1 id="site-title">代码手记</h1><div id="site-subtitle"><span id="subtitle"></span></div><div id="site_social_icons"><a class="social-icon" href="https://github.com/zyw9825" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:zyw_9825@163.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="tencent://AddContact/?fromId=45&amp;fromSubId=1&amp;subcmd=all&amp;uin=765830653&amp;website=www.oicqzone.com" target="_blank" title="添加QQ好友"><i class="fa-brands fa-qq"></i></a></div></div><div id="scroll-down"><i class="fas fa-angle-down scroll-down-effects"></i></div></header><main class="layout" id="content-inner"><div class="recent-posts nc" id="recent-posts"><div class="recent-post-items"><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2023/04/08/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" title="计算机网络基础知识总结"><i class="fas fa-thumbtack sticky"></i>计算机网络基础知识总结</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2023-04-07T16:00:00.000Z" title="发表于 2023-04-08 00:00:00">2023-04-08</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/">计算机网络</a></span></div><div class="content">第 1 章概述 1.1 计算机网络在信息时代中的作用  21 世纪的一些重要特征就是数字化、网络化和信息化，它是一个以网络为核心的信息时代。 网络是指“三网”，即电信网络、有线电视网络和计算机网络。 “三网融合”：随着技术的发展，电信网络和有线电视网络都逐渐融入了现代计算机网络的技术。 计算机网络向用户提供的最重要的功能：  连通性——计算机网络使上网用户之间都可以交换信息，好像这些用户的计算机都可以彼此直接连通一样。 共享——即资源共享。可以是信息共享、软件共享，也可以是硬件共享。    1.2 因特网概述   网络 (network)由若干结点 (node)和连接这些结点的链路 (link)组成。   网络中的结点可以说计算机、集线器、交换机或路由器等。    互联网是“网络的网络”(network of networks)。   因特网是世界上最大的互连网络。   连接在因特网上的计算机都称为主机 (host)。    网络把许多计算机连接在一起，而因特网把许多网路连接在一起。   因特网发展的三个阶段：  第一阶段是从单个网络 ARPANET...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2025/04/15/%E7%AE%97%E6%B3%95/%E5%9F%BA%E7%A1%80%E6%9A%B4%E5%8A%9B%E7%AE%97%E6%B3%95/" title="基础暴力算法">基础暴力算法</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2025-04-15T03:39:06.386Z" title="发表于 2025-04-15 11:39:06">2025-04-15</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E7%AE%97%E6%B3%95/">算法</a></span></div><div class="content">线性枚举 线性枚举（Linear Enumeration）是一种暴力枚举的方法，它逐一检查每个可能的解，适用于搜索和枚举问题。 其核心思路是：对问题的所有可能情况逐一进行遍历，并针对每种情况判断是否满足条件，从而得到解答。 线性枚举是一种顺序搜索算法，从线性表的第一个元素开始，根据特定的判断条件，做出相应的行为。变种比较多，最常见的就是求最值、求和等等。比如：   求最大值，伪代码 12345最大值 = 非常小的数for 当前元素 in 给定的线性表:    if 当前元素 &gt; 最大值:        最大值 = 当前元素返回 最大值 的值   求和，伪代码 1234求和 = 0for 当前元素 in 给定的线性表:    求和 = 求和 + 当前元素返回 求和 的值   时间复杂度 线性枚举需要遍历列表中的每个元素。 线性枚举的时间复杂度为 O (nm)，其中 n 是线性表的长度，m 是每次操作的量级。 对于求最大值和求和来说，因为操作比较简单，所以 m 为 1，则整体的时间复杂度是 O (n)...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2023/04/23/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/CSAPP-1%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E6%BC%AB%E6%B8%B8/" title="CSAPP-1计算机系统漫游">CSAPP-1计算机系统漫游</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2023-04-22T18:10:33.000Z" title="发表于 2023-04-23 02:10:33">2023-04-23</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9FCSAPP/">深入理解计算机系统CSAPP</a></span></div><div class="content">课程资源汇总：  CSAPP视频课 课程网址 书籍下载   计算机系统漫游 信息就是位+上下文   hello.c 123456#include &lt;stdio.h&gt;int main()&#123;    printf(&quot;hello, world\n&quot;);    return O;&#125;   hello 程序的生命周期是从一个源程序（或者说源文件）开始的，即程序员通过编译器创建并保存的文本文件 hello.c。  源程序实际上由 0 和 1 组成的比特序列，每 8 位称为一个字节。每个字节表示程序中的某些文本字符。 大部分现代计算机系统都是用 ASCII 标准来表示文本字符，即用唯一的一个单字节大小（8bit）表示的整数来表示每一个字符。 hello.c 程序以字节序列的方式存储在文件中。 像 hello.c 这样只由 ASCII...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2023/04/20/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OSTEP-1%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E4%B8%8A%E7%9A%84%E7%A8%8B%E5%BA%8F/" title="OSTEP-1操作系统上的程序">OSTEP-1操作系统上的程序</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2023-04-20T14:12:13.000Z" title="发表于 2023-04-20 22:12:13">2023-04-20</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AF%BC%E8%AE%BAOSTEP/">操作系统导论OSTEP</a></span></div><div class="content">课程资源  课程名称：《操作系统：设计与实现》（2022）——南京大学蒋炎岩老师   课程网站 课程视频 课程教材 课程作业   读书笔记  范围：  第 1 章：Dialogue 第 2 章：Introduction to Operating Systems    Introduction   当一个程序在运行时到底发生了什么？ 一个正在运行的程序只做一件非常简单的事情——执行指令： 处理器每秒数百万次或上亿次地从内存中获取指令，对其进行解码（即找出这到底是哪条指令），然后执行之（访问内存、检查条件、跳转函数等）。这条指令执行结束后，处理器就继续抓取下一条指令。重复上述过程直到整个程序结束。   什么是操作系统（OS）？ 操作系统是这样一个软件，它负责让程序运行变得更容易（甚至可以让你看起来同时运行很多程序），允许程序共享内存，允许程序与设备交互等等，它使得系统以易于使用的方式正确和有效地运行。 操作系统 OS 早期被称作监督程序（Supervisor）或者主控制程序（Master Control...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2023/04/09/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%85%AD%E2%80%94%E2%80%94%E5%9B%BE/" title="数据结构-6 图">数据结构-6 图</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2023-04-09T12:15:47.000Z" title="发表于 2023-04-09 20:15:47">2023-04-09</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">数据结构</a></span></div><div class="content">图的存储结构 图的顺序存储结构——邻接矩阵 12345678910typedef struct &#123;		int no;							//顶点编号，表示它的位置	char info;						//顶点的其他辅助信息，没有的话可以删除&#125;VertexType;	 //顶点		typedef struct&#123;			int edges[maxSize][maxSize];	//顶点之间的相邻关系（无权值：1表示相通，0表示不相通）（有权值：∞表示不相通，其它为权值）	int vexnum, arcnum;				//总顶点数和总边数	VertexType vex[maxSize];		//存放图中的所有顶点&#125;MGraph;		//图 图的链式存储结构——邻接链表 123456789101112131415161718//边——结点typedef struct ArcNode &#123;	int adjvex;					//该边所指顶点的位置	struct ArcNode *nextArc;	//指向下一条边的指针	int...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2023/04/09/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%BA%94%E2%80%94%E2%80%94%E6%A0%91%E4%B8%8E%E4%BA%8C%E5%8F%89%E6%A0%91/" title="数据结构-5 树与二叉树">数据结构-5 树与二叉树</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2023-04-09T12:14:47.000Z" title="发表于 2023-04-09 20:14:47">2023-04-09</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">数据结构</a></span></div><div class="content">树的基本概念  结点：结点不仅包含数据元素，而且包含指向子树的指针 结点的度：结点拥有的子树个数或者分支的个数。 树的度：树中各结点度的最大值。 叶子结点：又叫作终端结点，指度为0的结点 孩子：结点的子树的根结点。 双亲：与孩子的定义相对应。A是B的孩子，那么B就是A的双亲。 兄弟：同一 个双亲的孩子之间互为兄弟。 祖先：从根到某结点的路径上的所有结点，都是这个结点的祖先。 树的高度（或者深度）：树中结点的最大层次。 结点的深度：从根结点到该结点的路径上的结点个数。 结点的高度：从某结点往下走可能到达多个叶子结点，对应了多条通往这些叶子结点的路径，其中最长的那条路径上结点的个数。  树的存储结构   顺序存储结构：双亲存储结构 用一维数组即可实现：用数组下标表示树中的结点，数组元素的内容表示该结点的双亲结点，这样有了结点（下标）以及结点之间的关系（内容），就可以表示一...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2023/04/09/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%9B%9B%E2%80%94%E2%80%94%E6%95%B0%E7%BB%84%E3%80%81%E7%9F%A9%E9%98%B5%E4%B8%8E%E5%B9%BF%E4%B9%89%E8%A1%A8/" title="数据结构-4 数组、矩阵与广义表">数据结构-4 数组、矩阵与广义表</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2023-04-09T12:13:47.000Z" title="发表于 2023-04-09 20:13:47">2023-04-09</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">数据结构</a></span></div><div class="content">...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2023/04/09/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%89%E2%80%94%E2%80%94%E4%B8%B2/" title="数据结构-3 串">数据结构-3 串</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2023-04-09T12:12:47.000Z" title="发表于 2023-04-09 20:12:47">2023-04-09</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">数据结构</a></span></div><div class="content">串数据类型的定义 串的定义  串是由0个或多个字符组成的有限序列。 串中字符的个数称为串的长度，0个字符的串称为空串。 串中任意连续的字符组成的子序列称为子串，包含子串的串称为主串。 串是一种限定元素为字符的线性表。 串与线性表最大的区别是操作集不同，线性表主要是针对某一元素操作，而串则主要针对子串操作。  串的存储结构  定长顺序存储表示  1234typedef struct Str&#123;    char str[maxSize+1];	//maxSize为已定义的常量，表示串的最大长度。+1是以为多出一个结束标记`\0`    int length;&#125;Str; 虽然多了一个结束标记’\0’，但是计算长度length时并不纳入计算范围。  变长分配存储表示（动态分配存储表示）  1234typedef struct Str&#123;    char *ch;	//指向动态分配存储空间首地址的字符指针    int...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2023/04/09/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%BA%8C%E2%80%94%E2%80%94%E6%A0%88%E4%B8%8E%E9%98%9F%E5%88%97/" title="数据结构-2 栈与队列">数据结构-2 栈与队列</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2023-04-09T12:11:47.000Z" title="发表于 2023-04-09 20:11:47">2023-04-09</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">数据结构</a></span></div><div class="content">栈与队列 结构体定义  顺序栈定义  1234typedef struct&#123;    int data[maxSize];    int top;&#125;SqStack;  链栈结点定义  1234typedef struct LNode&#123;    int data;    struct LNode *next;&#125;LNode;  顺序队列定义  12345typedef struct&#123;    int data[maxSize];    int front;    int rear;&#125;SqQueue;  链队定义   12345//队结点类型定义typedef struct QNode&#123;    int data;    struct QNode *next;&#125;QNode; 12345//链队类型定义typedef struct&#123;    QNode *front;    QNode *rear;&#125;LiQueue; 栈的应用 顺序栈的应用  C语言里算术表达式中的括号只有小括号。编写算法，判断一...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2023/04/09/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%80%E2%80%94%E2%80%94%E7%BA%BF%E6%80%A7%E8%A1%A8/" title="数据结构-1 线性表">数据结构-1 线性表</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2023-04-09T12:10:47.000Z" title="发表于 2023-04-09 20:10:47">2023-04-09</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">数据结构</a></span></div><div class="content">线性表的结构体定义与基本操作 线性表的结构体定义  顺序表的结构体定义  一个顺序表中包含一个存储表中元素的数组data[]和一个指示元素个数的变量length： 12345#define maxSize 100typedef struct&#123;	int data[maxSize]; // 默认int型，可换	int legth;&#125;Sqlist; 简单写法： 12int A[maxSize]int n;  单链表的结点定义  12345typedef struct LNode&#123;	int data; //数据域	struct LNode *next; //指向后继结点的指针&#125;LNode; //定义单链表结点类型  双链表的结点定义  123456typedef struct DLNode&#123;	int data;//数据域	struct DLNode *prior;//指向前驱结点的指针	struct DLNode *next; //指向后继结点的指针&#125;DLNode;...</div></div></div></div><nav id="pagination"><div class="pagination"><span class="page-number current">1</span></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/20230408141525.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">zyw9825</div><div class="author-info-description">你且迷这风浪永远二十赶朝暮</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">10</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">9</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/zyw9825"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/zyw9825" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:zyw_9825@163.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="tencent://AddContact/?fromId=45&amp;fromSubId=1&amp;subcmd=all&amp;uin=765830653&amp;website=www.oicqzone.com" target="_blank" title="添加QQ好友"><i class="fa-brands fa-qq"></i></a></div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/04/15/%E7%AE%97%E6%B3%95/%E5%9F%BA%E7%A1%80%E6%9A%B4%E5%8A%9B%E7%AE%97%E6%B3%95/" title="基础暴力算法">基础暴力算法</a><time datetime="2025-04-15T03:39:06.386Z" title="发表于 2025-04-15 11:39:06">2025-04-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/04/23/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/CSAPP-1%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E6%BC%AB%E6%B8%B8/" title="CSAPP-1计算机系统漫游">CSAPP-1计算机系统漫游</a><time datetime="2023-04-22T18:10:33.000Z" title="发表于 2023-04-23 02:10:33">2023-04-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/04/20/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OSTEP-1%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E4%B8%8A%E7%9A%84%E7%A8%8B%E5%BA%8F/" title="OSTEP-1操作系统上的程序">OSTEP-1操作系统上的程序</a><time datetime="2023-04-20T14:12:13.000Z" title="发表于 2023-04-20 22:12:13">2023-04-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/04/09/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%85%AD%E2%80%94%E2%80%94%E5%9B%BE/" title="数据结构-6 图">数据结构-6 图</a><time datetime="2023-04-09T12:15:47.000Z" title="发表于 2023-04-09 20:15:47">2023-04-09</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/04/09/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%BA%94%E2%80%94%E2%80%94%E6%A0%91%E4%B8%8E%E4%BA%8C%E5%8F%89%E6%A0%91/" title="数据结构-5 树与二叉树">数据结构-5 树与二叉树</a><time datetime="2023-04-09T12:14:47.000Z" title="发表于 2023-04-09 20:14:47">2023-04-09</time></div></div></div></div><div class="card-widget card-categories"><div class="item-headline">
             <i class="fas fa-folder-open"></i>
             <span>分类</span>
             
-            </div>
-            <ul class="card-category-list" id="aside-cat-list">
+          </div>
+          <ul class="card-category-list" id="aside-cat-list">
             <li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AF%BC%E8%AE%BAOSTEP/"><span class="card-category-list-name">操作系统导论OSTEP</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"><span class="card-category-list-name">数据结构</span><span class="card-category-list-count">6</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9FCSAPP/"><span class="card-category-list-name">深入理解计算机系统CSAPP</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E7%AE%97%E6%B3%95/"><span class="card-category-list-name">算法</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"><span class="card-category-list-name">计算机网络</span><span class="card-category-list-count">1</span></a></li>
-            </ul></div><div class="card-widget card-tags"><div class="item-headline"><i class="fas fa-tags"></i><span>标签</span></div><div class="card-tag-cloud"><a href="/tags/CSAPP/" style="font-size: 1.15em; color: rgb(149, 65, 193)">CSAPP</a><a href="/tags/%E7%BA%BF%E6%80%A7%E8%A1%A8/" style="font-size: 1.15em; color: rgb(109, 103, 156)">线性表</a><a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" style="font-size: 1.15em; color: rgb(160, 29, 140)">操作系统</a><a href="/tags/%E5%9F%BA%E7%A1%80%E6%9A%B4%E5%8A%9B%E7%AE%97%E6%B3%95/" style="font-size: 1.15em; color: rgb(72, 182, 21)">基础暴力算法</a><a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 1.45em; color: rgb(16, 105, 180)">数据结构</a><a href="/tags/%E4%BA%8C%E5%8F%89%E6%A0%91/" style="font-size: 1.15em; color: rgb(97, 68, 134)">二叉树</a><a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" style="font-size: 1.15em; color: rgb(3, 120, 116)">计算机网络</a><a href="/tags/IP/" style="font-size: 1.15em; color: rgb(17, 115, 116)">IP</a><a href="/tags/TCP/" style="font-size: 1.15em; color: rgb(106, 29, 0)">TCP</a></div></div><div class="card-widget card-archives"><div class="item-headline"><i class="fas fa-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/04/"><span class="card-archive-list-date">四月 2025</span><span class="card-archive-list-count">1</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2023/04/"><span class="card-archive-list-date">四月 2023</span><span class="card-archive-list-count">9</span></a></li></ul></div><div class="card-widget card-webinfo"><div class="item-headline"><i class="fas fa-chart-line"></i><span>网站资讯</span></div><div class="webinfo"><div class="webinfo-item"><div class="item-name">文章数目 :</div><div class="item-count">10</div></div><div class="webinfo-item"><div class="item-name">已运行时间 :</div><div class="item-count" id="runtimeshow" data-publishDate="2023-04-07T16:00:00.000Z"><i class="fa-solid fa-spinner fa-spin"></i></div></div><div class="webinfo-item"><div class="item-name">本站总字数 :</div><div class="item-count">108.4k</div></div><div class="webinfo-item"><div class="item-name">本站访客数 :</div><div class="item-count" id="busuanzi_value_site_uv"><i class="fa-solid fa-spinner fa-spin"></i></div></div><div class="webinfo-item"><div class="item-name">本站总访问量 :</div><div class="item-count" id="busuanzi_value_site_pv"><i class="fa-solid fa-spinner fa-spin"></i></div></div><div class="webinfo-item"><div class="item-name">最后更新时间 :</div><div class="item-count" id="last-push-date" data-lastPushDate="2025-04-18T03:52:11.275Z"><i class="fa-solid fa-spinner fa-spin"></i></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2023 - 2025 By zyw9825</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div><div class="footer_custom_text"><img src="https://haiyong.site/img/icp.png"> <a href="https://beian.miit.gov.cn"  style="color:white" target="_blank">陕ICP备2025066278号-1</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><div class="js-pjax"><script>window.typedJSFn = {
-  init: (str) => {
+          </ul></div><div class="card-widget card-tags"><div class="item-headline"><i class="fas fa-tags"></i><span>标签</span></div><div class="card-tag-cloud"><a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" style="font-size: 1.1em; color: #999">操作系统</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 1.5em; color: #99a9bf">数据结构</a> <a href="/tags/TCP/" style="font-size: 1.1em; color: #999">TCP</a> <a href="/tags/%E5%9F%BA%E7%A1%80%E6%9A%B4%E5%8A%9B%E7%AE%97%E6%B3%95/" style="font-size: 1.1em; color: #999">基础暴力算法</a> <a href="/tags/IP/" style="font-size: 1.1em; color: #999">IP</a> <a href="/tags/%E4%BA%8C%E5%8F%89%E6%A0%91/" style="font-size: 1.1em; color: #999">二叉树</a> <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" style="font-size: 1.1em; color: #999">计算机网络</a> <a href="/tags/CSAPP/" style="font-size: 1.1em; color: #999">CSAPP</a> <a href="/tags/%E7%BA%BF%E6%80%A7%E8%A1%A8/" style="font-size: 1.1em; color: #999">线性表</a></div></div><div class="card-widget card-archives">
+    <div class="item-headline">
+      <i class="fas fa-archive"></i>
+      <span>归档</span>
+      
+    </div>
+  
+    <ul class="card-archive-list">
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2025/04/">
+            <span class="card-archive-list-date">
+              四月 2025
+            </span>
+            <span class="card-archive-list-count">1</span>
+          </a>
+        </li>
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2023/04/">
+            <span class="card-archive-list-date">
+              四月 2023
+            </span>
+            <span class="card-archive-list-count">9</span>
+          </a>
+        </li>
+      
+    </ul>
+  </div><div class="card-widget card-webinfo"><div class="item-headline"><i class="fas fa-chart-line"></i><span>网站信息</span></div><div class="webinfo"><div class="webinfo-item"><div class="item-name">文章数目 :</div><div class="item-count">10</div></div><div class="webinfo-item"><div class="item-name">本站访客数 :</div><div class="item-count" id="busuanzi_value_site_uv"><i class="fa-solid fa-spinner fa-spin"></i></div></div><div class="webinfo-item"><div class="item-name">本站总浏览量 :</div><div class="item-count" id="busuanzi_value_site_pv"><i class="fa-solid fa-spinner fa-spin"></i></div></div><div class="webinfo-item"><div class="item-name">最后更新时间 :</div><div class="item-count" id="last-push-date" data-lastPushDate="2025-05-01T07:04:07.512Z"><i class="fa-solid fa-spinner fa-spin"></i></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2023 - 2025 By zyw9825</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.5</a></div><div class="footer_custom_text"><img src="https://haiyong.site/img/icp.png"> <a href="https://beian.miit.gov.cn"  style="color:white" target="_blank">陕ICP备2025066278号-1</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>window.typedJSFn = {
+  init: str => {
     window.typed = new Typed('#subtitle', Object.assign({
       strings: str,
       startDelay: 300,
@@ -421,90 +196,106 @@ C语言里算术表达式中的括号只有小括号。编写算法，判断一 
       backSpeed: 50,
     }, null))
   },
-  run: (subtitleType) => {
+  run: subtitleType => {
     if (true) {
       if (typeof Typed === 'function') {
         subtitleType()
       } else {
-        getScript('https://cdn.jsdelivr.net/npm/typed.js/lib/typed.min.js').then(subtitleType)
+        btf.getScript('https://cdn.jsdelivr.net/npm/typed.js/dist/typed.umd.min.js').then(subtitleType)
       }
     } else {
       subtitleType()
     }
+  },
+  processSubtitle: (content, extraContents = []) => {
+    if (true) {
+      const sub = ["Pain is inevitable","Suffering is optional"].slice()
+
+      if (extraContents.length > 0) {
+        sub.unshift(...extraContents)
+      }
+
+      if (typeof content === 'string') {
+        sub.unshift(content)
+      } else if (Array.isArray(content)) {
+        sub.unshift(...content)
+      }
+
+      sub.length > 0 && typedJSFn.init(sub)
+    } else {
+      document.getElementById('subtitle').textContent = typeof content === 'string' ? content :
+        (Array.isArray(content) && content.length > 0 ? content[0] : '')
+    }
   }
 }
+btf.addGlobalFn('pjaxSendOnce', () => { typed.destroy() }, 'typedDestroy')
 </script><script>function subtitleType () {
-  if (true) {
-    typedJSFn.init(["Pain is inevitable","Suffering is optional"])
-  } else {
-    document.getElementById("subtitle").innerHTML = 'Pain is inevitable'
-  }
+  typedJSFn.processSubtitle(["Pain is inevitable","Suffering is optional"])
 }
-typedJSFn.run(subtitleType)</script></div><div class="aplayer no-destroy" data-lrctype="0" data-id="922753585" data-order="random" data-listmaxheight="200px" data-theme="#2980b9" data-server="netease" data-type="playlist" data-fixed="true" data-autoplay="true"> </div><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-fluttering-ribbon.min.js"></script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/click-heart.min.js" async="async" mobile="true"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/metingjs/dist/Meting.min.js"></script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
-
-var pjax = new Pjax({
-  elements: 'a:not([target="_blank"])',
-  selectors: pjaxSelectors,
-  cacheBust: false,
-  analytics: false,
-  scrollRestoration: false
-})
-
-document.addEventListener('pjax:send', function () {
-
-  // removeEventListener scroll 
-  window.tocScrollFn && window.removeEventListener('scroll', window.tocScrollFn)
-  window.scrollCollect && window.removeEventListener('scroll', scrollCollect)
-
-  document.getElementById('rightside').style.cssText = "opacity: ''; transform: ''"
-  
-  if (window.aplayers) {
-    for (let i = 0; i < window.aplayers.length; i++) {
-      if (!window.aplayers[i].options.fixed) {
-        window.aplayers[i].destroy()
+typedJSFn.run(subtitleType)</script></div><div class="aplayer no-destroy" data-lrctype="0" data-id="922753585" data-order="random" data-listmaxheight="200px" data-theme="#2980b9" data-server="netease" data-type="playlist" data-fixed="true" data-autoplay="true"> </div><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-fluttering-ribbon.min.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/metingjs/dist/Meting.min.js"></script><script>(() => {
+  const destroyAplayer = () => {
+    if (window.aplayers) {
+      for (let i = 0; i < window.aplayers.length; i++) {
+        if (!window.aplayers[i].options.fixed) {
+          window.aplayers[i].destroy()
+        }
       }
     }
   }
 
-  typeof typed === 'object' && typed.destroy()
+  const runMetingJS = () => {
+    typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+  }
 
-  //reset readmode
-  const $bodyClassList = document.body.classList
-  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+  btf.addGlobalFn('pjaxSend', destroyAplayer, 'destroyAplayer')
+  btf.addGlobalFn('pjaxComplete', loadMeting, 'runMetingJS')
+})()</script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>(() => {
+  const pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
 
-  typeof disqusjs === 'object' && disqusjs.destroy()
-})
-
-document.addEventListener('pjax:complete', function () {
-  window.refreshFn()
-
-  document.querySelectorAll('script[data-pjax]').forEach(item => {
-    const newScript = document.createElement('script')
-    const content = item.text || item.textContent || item.innerHTML || ""
-    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
-    newScript.appendChild(document.createTextNode(content))
-    item.parentNode.replaceChild(newScript, item)
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
   })
 
-  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
-
-  typeof chatBtnFn === 'function' && chatBtnFn()
-  typeof panguInit === 'function' && panguInit()
-
-  // google analytics
-  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
-
-  // baidu analytics
-  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
-
-  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
-
-  // prismjs
-  typeof Prism === 'object' && Prism.highlightAll()
-})
-
-document.addEventListener('pjax:error', (e) => {
-  if (e.request.status === 404) {
-    pjax.loadUrl('/404.html')
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => fn())
   }
-})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></body></html>
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      const usePjax = true
+      false 
+        ? (usePjax ? pjax.loadUrl('/404.html') : window.location.href = '/404.html')
+        : window.location.href = e.request.responseURL
+    }
+  })
+})()</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
