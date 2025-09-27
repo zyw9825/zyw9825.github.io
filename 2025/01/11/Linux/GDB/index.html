@@ -1,0 +1,578 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>GDB学习笔记 | 代码手记</title><meta name="author" content="zyw9825"><meta name="copyright" content="zyw9825"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="GDB GDB 是一个由 GNU 开源组织发布的、UNIX&#x2F;LINUX 操作系统下的、基于命令行的、功能强大的程序调试工具。 1. 调试准备 习惯上如果是 c 程序就使用 gcc 编译, 如果是 c++程序就使用 g++编译。如果我们打算对程序进行调试，则必须在程序编译时打开调试选项（-g），还可以额外搭配别的选项，比如：  建议调试时关掉编译器的优化选项（-O0），使用高优化（如 -O2 或 -">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GDB学习笔记">
+<meta property="og:url" content="https://zyw9825.github.io/2025/01/11/Linux/GDB/index.html">
+<meta property="og:site_name" content="代码手记">
+<meta property="og:description" content="GDB GDB 是一个由 GNU 开源组织发布的、UNIX&#x2F;LINUX 操作系统下的、基于命令行的、功能强大的程序调试工具。 1. 调试准备 习惯上如果是 c 程序就使用 gcc 编译, 如果是 c++程序就使用 g++编译。如果我们打算对程序进行调试，则必须在程序编译时打开调试选项（-g），还可以额外搭配别的选项，比如：  建议调试时关掉编译器的优化选项（-O0），使用高优化（如 -O2 或 -">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg">
+<meta property="article:published_time" content="2025-01-11T03:29:50.000Z">
+<meta property="article:modified_time" content="2025-01-11T03:31:50.000Z">
+<meta property="article:author" content="zyw9825">
+<meta property="article:tag" content="GDB">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "GDB学习笔记",
+  "url": "https://zyw9825.github.io/2025/01/11/Linux/GDB/",
+  "image": "https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg",
+  "datePublished": "2025-01-11T03:29:50.000Z",
+  "dateModified": "2025-01-11T03:31:50.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "zyw9825",
+      "url": "https://zyw9825.github.io/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/book.svg"><link rel="canonical" href="https://zyw9825.github.io/2025/01/11/Linux/GDB/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?08ead5bb7d005bd4116f0ec90195f830";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+btf.addGlobalFn('pjaxComplete', () => {
+  _hmt.push(['_trackPageview',window.location.pathname])
+}, 'baidu_analytics')
+</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'GDB学习笔记',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"  media="defer" onload="this.media='all'"><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">37</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">29</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">13</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/shuoshuo/"><i class="fa-fw fas fa-comments"></i><span> 说说</span></a></div><div class="menus_item"><a class="site-page" href="/message/"><i class="fa-fw far fa-comment"></i><span> 留言板</span></a></div></div></div></div><div class="post type-note" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/11ps.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">代码手记</span></a><a class="nav-page-title" href="/"><span class="site-name">GDB学习笔记</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/shuoshuo/"><i class="fa-fw fas fa-comments"></i><span> 说说</span></a></div><div class="menus_item"><a class="site-page" href="/message/"><i class="fa-fw far fa-comment"></i><span> 留言板</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">GDB学习笔记</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-01-11T03:29:50.000Z" title="发表于 2025-01-11 11:29:50">2025-01-11</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-01-11T03:31:50.000Z" title="更新于 2025-01-11 11:31:50">2025-01-11</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Linux/">Linux</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">4.1k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>14分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h2 id="GDB">GDB</h2>
+<p>GDB 是一个由 GNU 开源组织发布的、UNIX/LINUX 操作系统下的、基于命令行的、功能强大的程序调试工具。</p>
+<h3 id="1-调试准备">1. 调试准备</h3>
+<p>习惯上如果是 c 程序就使用 gcc 编译, 如果是 c++程序就使用 g++编译。如果我们打算对程序进行调试，则必须在程序编译时打开调试选项（<code>-g</code>），还可以额外搭配别的选项，比如：</p>
+<ul>
+<li>建议调试时关掉编译器的优化选项（<code>-O0</code>），使用高优化（如 <code>-O2</code> 或 <code>-O3</code>），代码可能被重构，导致调试时行号或变量行为与源代码不一致。</li>
+<li><code>-Wall</code> 选项打开所有 warning，也可以发现许多问题，避免一些不必要的 bug。</li>
+</ul>
+<p>-g 选项告诉 gcc 在编译时生成调试信息，这些信息会被嵌入到目标文件中（如可执行文件或对象文件），以便调试工具（如 GDB）能够关联源代码与生成的机器码，从而支持源代码级别的调试。所以，带 -g 的目标文件会显著变大。</p>
+<h3 id="2-启动和退出-GDB">2. 启动和退出 GDB</h3>
+<p>gdb 是一个用于应用程序调试的进程,，需要先将其打开。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$</span><span class="language-bash">gdb app     <span class="comment"># 启动 gdb</span></span></span><br><span class="line">(gdb) 		# 启动后 gdb 等待输入调试的相关命令</span><br></pre></td></tr></table></figure>
+<p>app 是可执行程序的名字。要注意的是，这个命令只是启动了 gdb，但是 app 并没有开始执行。</p>
+<p>有的程序启动时需要传递一些命令行参数。对于这些程序，不能直接启动，而是要先通过 <code>set args ...</code> 设置命令行参数，查看设置的命令行参数命令是 <code>show args</code>。语法如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">设置的时机: 启动gdb之后, 在应用程序启动之前</span></span><br><span class="line">(gdb) set args 参数1 参数2 .... ...</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看设置的命令行参数</span></span><br><span class="line">(gdb) show args</span><br></pre></td></tr></table></figure>
+<p>设置参数的时机应该是 gdb 启动以后，app 启动之前。</p>
+<p>启动调试程序时，有两个命令可选：</p>
+<ul>
+<li><code>run</code> （简写 <code>r</code>）：启动程序并让它运行，直到遇到以下情况之一：
+<ul>
+<li>程序正常结束</li>
+<li>遇到断点（breakpoint）</li>
+<li>发生异常（如段错误）</li>
+<li>收到信号（如 Ctrl+C）</li>
+</ul>
+</li>
+<li><code>start</code>（简写 <code>s</code>）：程序启动后立即停在 main 函数的第一行可执行代码处。相当于在 main 函数开头隐式设置一个临时断点（temporary breakpoint），然后运行程序。</li>
+</ul>
+<p>可以直接在run命令后面设置参数并运行，语法：<code>run &#123;args&#125;</code>。</p>
+<p>如果想让程序 start 之后继续运行，或者在断点处继续运行，可以使用 <code>continue</code> 命令（简写 <code>c</code>）或者 <code>next</code>（简写 <code>n</code>）。</p>
+<p>如果调试结束，想要退出gdb，输入 <code>quit</code>（简写 <code>q</code>）。</p>
+<h3 id="3-查看代码">3. 查看代码</h3>
+<p>在 GNU Debugger (GDB) 中，list 命令（简写为 l）用于显示源代码。它可以帮助你在调试时查看程序的上下文。</p>
+<ol>
+<li>基本用法
+<ul>
+<li>输入 <code>list</code> 或 <code>l</code>：显示当前执行点附近的源代码（默认是 10 行，5 行在当前行之前，5 行之后）。再次按下 <code>l</code> 或者 <code>Enter</code> 会继续显示接下来的代码段。</li>
+</ul>
+</li>
+</ol>
+<blockquote>
+<p>[!Note]<br>
+如果你用 <code>gdb 可执行程序名</code> 启动 GDB，此时还没有开始执行程序，默认的执行点是不确定的。在这种情况下，list 命令通常会显示程序入口点附近的代码（比如 main 函数的开头）。</p>
+</blockquote>
+<ol start="2">
+<li>指定行号
+<ul>
+<li><code>list 行号</code>：显示指定行号附近的代码。</li>
+<li><code>list 起始行,结束行</code>：显示从起始行到结束行的代码。例如，<code>list 10,20</code> 显示第 10 行到第 20 行的代码。</li>
+</ul>
+</li>
+<li>指定函数
+<ul>
+<li><code>list 函数名</code>：显示某个函数的源代码。例如，<code>list main</code> 会展示 main 函数附近的代码。</li>
+</ul>
+</li>
+<li>结合文件
+<ul>
+<li><code>list 文件名:行号</code>：显示指定文件中的某一行附近的代码。例如，<code>list main.c:25</code>。</li>
+<li><code>list 文件名:函数名</code>：显示指定文件中某个函数的代码。</li>
+</ul>
+</li>
+<li>调整每次显示的行数
+<ul>
+<li><code> set listsize 行数</code> ：调整每次显示的行数，比如 <code>set listsize 2</code>。可以使用 <code>show listsize</code> 查看当前设置。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<p>另一种查看代码的方式是使用打开 gdb 的 TUI（Text User Interface，文本用户界面）模式，这是 gdb 提供的一种可视化调试方式，允许你在终端更直观的查看源代码、反汇编代码、和寄存器等内容，同时进行调试。非常适合在没有图形化界面的环境中使用。</p>
+<p>要进入 TUI 模式并使用其功能，可以通过以下几种命令：</p>
+<ul>
+<li><strong><code>layout src</code></strong>：开启显示源代码的 TUI 布局。</li>
+<li><strong><code>layout asm</code></strong>：开启显示反汇编代码的 TUI 布局。</li>
+<li><strong><code>layout reg</code></strong>：开启显示 CPU 寄存器值的 TUI 布局。</li>
+<li><strong><code>layout split</code></strong>：同时显示源代码和反汇编代码的布局。</li>
+</ul>
+<p>比如我们想在调试的同时查看源代码，可以输入 <code>layout src</code>，上面是源代码，下面是调试窗口。</p>
+<p>在TUI模式下，可以结合使用 <code>list</code> 命令来显示你想要查看的文件及其代码。</p>
+<p>如果要退出TUI模式，使用快捷键 <code>Ctrl + X, A</code>。</p>
+<h3 id="4-断点操作">4. 断点操作</h3>
+<p>断点（breakpoint）是调试的核心功能之一，允许你在程序的特定位置暂停执行，以便检查变量、调用栈等。</p>
+<p>在 GDB 中，断点（breakpoint）是调试的核心功能之一，允许你在程序的特定位置暂停执行，以便检查变量、调用栈等。以下是 GDB 中断点操作的详细说明和常用命令：</p>
+<ol>
+<li>
+<p><strong>设置断点</strong></p>
+<ul>
+<li>按行号设置：<code>break 行号</code> 或 <code>b 行号</code></li>
+<li>按函数名设置：<code>break 函数名</code> 或 <code>b 函数名</code>。示例：<code>break main</code> 在 <code>main</code> 函数入口设置断点。</li>
+<li>按文件和行号设置：：<code>break 文件名:行号</code>。示例：<code>break main.c:15</code> 在 <code>main.c</code> 文件的第 15 行设置断点。</li>
+<li>按文件和函数设置：<code>break 文件名:函数名</code>。示例：<code>break main.c:foo</code> 在 <code>main.c</code> 文件的 <code>foo</code> 函数设置断点。</li>
+<li>设置watchpoint（观察点）：<code>watch 表达式</code>：监视指定表达式的值是否改变。观察点（watchpoint）是一种特殊的断点，它允许你在程序中的某个表达式的值发生变化时暂停程序的执行。这对于调试那些由于变量值被意外修改而导致的问题特别有用。</li>
+</ul>
+</li>
+<li>
+<p><strong>查看断点</strong></p>
+<ul>
+<li>命令：<code>info breakpoints</code> 或 <code>info break</code>，<code>info</code> 可以缩写为 <code>i</code>。</li>
+<li>功能：列出所有已设置的断点，包括编号、位置、启用状态等。</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">(gdb) info break</span><br><span class="line">Num     Type           Disp Enb Address            What</span><br><span class="line">1       breakpoint     keep y   0x000000000000115c in main at main.c:13</span><br><span class="line">2       breakpoint     keep y   0x000000000000117e in main at main.c:16</span><br></pre></td></tr></table></figure>
+<p>运行 info break 后，GDB 会返回一个表格，包含以下列：<br>
+1. <strong>Num</strong>：断点编号，用于后续操作（如 delete、disable、commands）。<br>
+2. <strong>Type</strong>：断点类型，通常是 breakpoint（普通断点），也可能是 watchpoint（观察点）等。<br>
+3. <strong>Disp</strong>：断点的处置方式。keep：保留断点（默认），del：临时断点，触发一次后删除（由 tbreak 设置）。<br>
+4. <strong>Enb</strong>：启用状态。y：启用，n：禁用。<br>
+5. <strong>Address</strong>：断点所在的内存地址（十六进制）。<br>
+6. <strong>What</strong>：断点的位置信息，通常包括文件名和行号，或函数名。</p>
+</li>
+<li>
+<p><strong>删除断点</strong></p>
+<ul>
+<li>删除特定断点：<code>delete 断点编号</code> 或 <code>d 断点编号</code>，删除一个或者多个指定断点，或者删除一个连续的断点区间。<br>
+示例：
+<ul>
+<li><code>delete 1</code> 删除编号为 1 的断点（编号从 <code>info break</code> 获取）；</li>
+<li><code>delete 1 2 3</code> 删除编号为 1、2、3 的断点；</li>
+<li><code>delete 4-6</code> 删除断点编号为 4、5、6 的断点。</li>
+</ul>
+</li>
+<li>删除所有断点 <code>delete</code> 或 <code>d</code>。清除所有断点，会提示确认。</li>
+</ul>
+</li>
+<li>
+<p><strong>启用/禁用断点</strong></p>
+<ul>
+<li>禁用断点：<code>disable 断点编号</code>。示例：<code>disable 2</code> 禁用编号为 2 的断点（断点保留但不生效）。</li>
+<li>启用断点：<code>enable 断点编号</code>。<code>enable 2</code> 重新启用编号为 2 的断点。</li>
+<li>查看状态：用 <code>info break</code> 检查，<code>Enb</code> 列显示 <code>y</code>（启用）或 <code>n</code>（禁用）。</li>
+</ul>
+</li>
+<li>
+<p><strong>条件断点</strong></p>
+<ul>
+<li>设置条件断点：<code>break 位置 if 条件</code>。示例：<code>break 10 if x == 5</code> 在第 10 行设置断点，仅当变量 <code>x</code> 等于 5 时暂停。</li>
+<li>修改已有断点条件：<code>condition 断点编号 条件</code>。示例：<code>condition 1 x &gt; 0</code> 修改编号 1 的断点条件为 <code>x &gt; 0</code>。</li>
+<li>移除条件：<code>condition 断点编号</code>。<code>condition 1</code> 清除编号 1 断点的条件。</li>
+</ul>
+</li>
+<li>
+<p><strong>临时断点</strong></p>
+<ul>
+<li>命令：<code>tbreak 位置</code>，设置一次性断点，触发一次后自动删除。示例：<code>tbreak main</code> 在 <code>main</code> 函数入口设置临时断点</li>
+</ul>
+</li>
+<li>
+<p><strong>实用技巧</strong></p>
+<ul>
+<li>
+<p><strong>保存断点</strong>：用 <code>save breakpoints 文件名</code> 保存断点到文件，下次调试用 <code>source 文件名</code> 加载。</p>
+</li>
+<li>
+<p><strong>自动执行命令</strong>：用 <code>commands 断点编号</code> 设置断点触发时自动执行的命令，例如打印变量。</p>
+<p>使用步骤：</p>
+<ol>
+<li>输入 commands 断点编号。</li>
+<li>在提示符 &gt; 下输入要执行的命令（每行一个）。</li>
+<li>输入 end 结束命令定义。<br>
+示例：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">gdb ./a.out</span></span><br><span class="line">(gdb) break 5          # 在第5行设置断点</span><br><span class="line">Breakpoint 1 at 0x400526: file main.c, line 5.</span><br><span class="line">(gdb) commands 1       # 为断点1设置命令</span><br><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash"><span class="built_in">print</span> x             <span class="comment"># 每次触发时打印 x 的值</span></span></span><br><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash"><span class="built_in">print</span> i             <span class="comment"># 打印 i 的值</span></span></span><br><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash">end 				<span class="comment"># 结束</span></span>	</span><br><span class="line">(gdb) run</span><br><span class="line">Breakpoint 1, main () at main.c:5</span><br><span class="line">5            x += i;</span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">1 = 0</span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">2 = 0</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ol>
+<h3 id="5-调试命令">5. 调试命令</h3>
+<ol>
+<li>
+<p><strong>断点控制</strong>：</p>
+<ul>
+<li><strong>继续执行</strong>：<code>continue</code> 或 <code>c</code>。功能：从当前断点继续运行，直到下一个断点或程序结束。</li>
+<li><strong>单步跳过</strong>：<code>next</code> 或 <code>n</code>。功能：在当前断点处执行下一步（不进入函数）。</li>
+<li><strong>单步进入</strong>：<code>step</code> 或 <code>s</code>。功能：在当前断点处进入函数内部。</li>
+<li><strong>跳出函数</strong>：<code>finish</code>。功能：从当前函数执行到返回。如果想要跳出函数体必须要保证函数体内不能有有效断点，否则无法跳出。</li>
+<li><strong>执行到指定位置</strong>：<code>until &lt;line&gt;</code> 功能：持续执行直到执行到某行。</li>
+</ul>
+</li>
+<li>
+<p><strong>使用 print 手动打印信息</strong></p>
+<ul>
+<li>
+<p><code>print 变量名或表达式</code>： 显示指定变量或表达式的值。<code>print</code> 可以简写为 <code>p</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">(gdb) print x         # 打印变量 x 的值</span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">1 = 42</span></span><br><span class="line">(gdb) print x + 5     # 打印表达式 x + 5 的结果</span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">2 = 47</span></span><br></pre></td></tr></table></figure>
+<p>每次打印的结果会带一个 <code>$</code> 编号，可以用它后续引用。</p>
+</li>
+</ul>
+</li>
+</ol>
+<blockquote>
+<p>[!NOTE]</p>
+<p>如果变量是整数，还可以指定输出格式（默认是十进制）。GDB 中的整数格式化：</p>
+<ul>
+<li>x：十六进制</li>
+<li>d：十进制</li>
+<li>u：无符号十进制</li>
+<li>o：八进制</li>
+<li>t：二进制</li>
+<li>c：字符</li>
+<li>s：字符串</li>
+<li>f：浮点数</li>
+</ul>
+<p>比如 <code>p/t i</code> 表示以二进制输出 i，<code>p/o i</code> 以八进制输出 i，<code>p/x i</code> 表示以十六进制输出 i。</p>
+</blockquote>
+<ul>
+<li>
+<p><code>printf &quot;格式字符串&quot;, 变量1, 变量2, ...</code> 格式化打印，类似于 C 语言中的格式化输出。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(gdb) printf &quot;已输出：x = %d, y = %f\n&quot;, x, y</span><br><span class="line">已输出：x = 42, y = 3.140000</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<ol start="3">
+<li>
+<p><strong>使用 ptype 查看变量或类型的定义</strong></p>
+<ul>
+<li>
+<p><code>ptype 变量名或类型名 </code> 打印变量、类型（结构体、数组、类、指针等）的详细类型信息。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">(gdb) ptype i # 打印变量类型</span><br><span class="line">type = int</span><br><span class="line"></span><br><span class="line">(gdb) ptype Person # 打印结构体类型</span><br><span class="line">struct Person &#123;</span><br><span class="line">    char *name;</span><br><span class="line">    int age;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>使用 display 自动打印信息</strong></p>
+<ul>
+<li><code>display 变量名或表达式</code> ：设置变量或表达式在每次程序暂停（如断点或单步）时自动显示。当我们想频繁查看某个变量或表达式的值从而观察它的变化情况时，使用 display 比 print 高效得多。注意，display 没有简写，d 是 delete 的简写。</li>
+<li><code>info display</code>：查看已经设置的 display。</li>
+<li><code>disable display &lt;编号&gt;</code>：暂时禁用 display，编号从 info  display 中查看。</li>
+<li><code>undisplay &lt;编号&gt;</code>：删除 display。也可以使用 <code>delete display &lt;编号&gt;</code>。</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">(gdb) display argc	</span><br><span class="line">1: argc = 1</span><br><span class="line">(gdb) i display	# 查看 display</span><br><span class="line">Auto-display expressions now in effect:</span><br><span class="line">Num Enb Expression</span><br><span class="line">1:   y  argc</span><br><span class="line">(gdb) disable display 1 # 禁用编号为1的dispaly</span><br><span class="line">(gdb) i display # 重新查看，Enb列变为 n</span><br><span class="line">Auto-display expressions now in effect:</span><br><span class="line">Num Enb Expression</span><br><span class="line">1:   n  argc</span><br><span class="line">(gdb) undisplay 1 # 删除编号为1的display</span><br><span class="line">(gdb) i display # 重新查看</span><br><span class="line">There are no auto-display expressions now.</span><br></pre></td></tr></table></figure>
+</li>
+<li>
+<p><strong>使用 info 查看特定信息</strong></p>
+<ul>
+<li><code>info sources</code>：显示当前程序的所有源文件。</li>
+<li><code>info breakpoints</code>：显示所有已设置的断点及其状态。</li>
+<li><code>info stack</code> 或 <code>info s</code>：显示当前调用栈的信息，有助于理解函数调用顺序。</li>
+<li><code>info locals</code>：列出当前堆栈帧（即当前执行位置）的所有局部变量及其值。</li>
+<li><code>info args</code>：列出当前堆栈帧中函数的参数及其值。</li>
+<li><code>info registers</code>：显示 CPU 寄存器的内容。这对于低级别的调试特别有用。</li>
+<li><code>info frame</code> 显示关于当前堆栈帧的详细信息。</li>
+<li><code>info threads</code>：在多线程程序中，显示所有线程的状态和 ID。</li>
+<li><code>info inferiors</code>：查看当前进程和id。使用 <code>inferior &#123;id&#125;</code> 切换进程。</li>
+<li><code>info functions [regexp]</code> ：列出可调试的程序中的所有函数。你可以使用正则表达式来过滤特定的函数名。</li>
+<li><code>info variables [regexp]</code>：列出可调试的程序中的所有全局变量和静态变量。同样支持使用正则表达式进行筛选。</li>
+</ul>
+</li>
+<li>
+<p><strong>使用 x 查看内存信息</strong></p>
+<p>x 命令用于检查内存中的内容。它非常强大，可以以不同的格式和单位显示指定地址处的数据。</p>
+<ul>
+<li>
+<p>语法：<code>x/[数量][格式][单位] 地址</code></p>
+<ul>
+<li>数量：指定要显示的内存单元数量（可选，默认是 1）。</li>
+<li>格式：指定显示的格式（例如十六进制 x、十进制 d 等）。</li>
+<li>单位：指定每个单元的大小（字节 b、半字 h、字 w、双字 g），默认为字（word，4 个字节）。</li>
+<li>地址：要检查的内存地址，可以是具体数值或变量的地址（如 <code>&amp;var1</code>）。</li>
+</ul>
+</li>
+<li>
+<p>示例：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">int a = 42;</span></span><br><span class="line"></span><br><span class="line">(gdb) print &amp;a # 查看 a 的内存地址</span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">1 = (int *) 0x7fffffffde4c</span> </span><br><span class="line"></span><br><span class="line">(gdb) x/xw 0x7fffffffde4c	# 查看单个字（4 字节）的值（十六进制），整型变量的大小为4个字节</span><br><span class="line">0x7fffffffde4c: 0x0000002a  # 42 的十六进制是 0x2a</span><br><span class="line"></span><br><span class="line">(gdb) x/4xb &amp;a # 可以直接用取址符&amp;，查看 4 个字节的内容（十六进制，逐字节显示）</span><br><span class="line">0x7fffffffde4c: 0x2a 0x00 0x00 0x00 # 小端存储，0x2a 对应于42的最低有效字节</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>堆栈和帧管理</strong></p>
+<ul>
+<li>
+<p>堆栈（Stack）：程序运行时用于存储函数调用信息的数据结构。每次函数调用时，会在堆栈上创建一个新的“栈帧”（stack frame），包含函数参数、局部变量和返回地址等信息。</p>
+</li>
+<li>
+<p>帧（Frame）：堆栈中的一个单元，对应一次函数调用。当前执行的函数对应“当前帧”，其调用者对应“上一帧”，以此类推。</p>
+</li>
+<li>
+<p><code>backtrace</code> 或 <code>bt</code>：显示当前的调用栈（从当前帧到最外层帧）。</p>
+</li>
+<li>
+<p><code>bt full</code>：除了函数名和行号，还会显示每个帧中的局部变量值。</p>
+</li>
+<li>
+<p><code>where</code> 和 <code>bt</code> 功能完全相同。</p>
+</li>
+<li>
+<p><code>frame </code> 或 <code>f</code> ：显示当前帧的详细信息，包括函数名、源文件名、行号和地址。</p>
+</li>
+<li>
+<p><code>frame &lt;帧号&gt;</code>（简称 <code>f &lt;帧号&gt;</code>）： 切换到指定编号的帧，可以配合 <code>info locals</code> 查看该帧中的局部变量，配合 <code>info args</code> 查看当前帧的函数参数。</p>
+</li>
+<li>
+<p><code>up</code>、<code>down</code>：向上移动一帧（从当前帧到调用者帧），向下移动一帧（从当前帧到被调用者帧）。</p>
+</li>
+<li>
+<p>示例：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="type">void</span> <span class="title function_">func2</span><span class="params">(<span class="type">int</span> x)</span> &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;x = %d\n&quot;</span>, x);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">void</span> <span class="title function_">func1</span><span class="params">(<span class="type">int</span> y)</span> &#123;</span><br><span class="line">    func2(y + <span class="number">10</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    func1(<span class="number">20</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">(gdb) b func2 # 断点</span><br><span class="line">(gdb) run</span><br><span class="line">(gdb) bt</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">0  func2 (x=30) at main.c:3</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">1  0x0000555555555190 <span class="keyword">in</span> func1 (y=20) at main.c:6</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">2  0x00005555555551a5 <span class="keyword">in</span> main () at main.c:9</span></span><br></pre></td></tr></table></figure>
+<p>\ #0 是当前帧，func2 是当前执行的函数。\ #1 是调用 func2 的函数 func1，依次向上追溯到 main。</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>设置变量值</strong></p>
+<ul>
+<li>
+<p><code>set var 变量名=值</code> 或 <code>set &lt;变量名&gt; = &lt;值&gt;</code>：通过 set 命令设置变量的值，从而在调试过程中修改程序的状态。</p>
+<p>如果变量是数组或指针，可以指定具体元素：<code>set var arr[1] = 99</code>。</p>
+<p>你只能修改当前作用域内可见的变量。使用 <code>info locals</code> 查看当前局部变量，或 <code>info variables</code> 查看全局/静态变量。</p>
+<p>可以结合 gdb 的条件语句：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">(gdb) if global_var &lt; 50</span><br><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash"><span class="built_in">set</span> variable global_var = 50</span></span><br><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash">end</span></span><br></pre></td></tr></table></figure>
+<p>或者循环语句：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">(gdb) set $i = 0</span><br><span class="line">(gdb) while $i &lt; 3</span><br><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash"><span class="built_in">set</span> variable arr[<span class="variable">$i</span>] = <span class="variable">$i</span> * 10</span></span><br><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash"><span class="built_in">set</span> <span class="variable">$i</span> = <span class="variable">$i</span> + 1</span></span><br><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash">end</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li>
+<p>加载新的可执行文件</p>
+<ul>
+<li><code>file &#123;object&#125; </code> 加载新的可执行文件供调试。</li>
+</ul>
+</li>
+<li>
+<p>退出 gdb：<code>quit</code> 或 <code>q</code>。</p>
+</li>
+</ol>
+<h3 id="cheet-sheet">cheet sheet</h3>
+<p><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/gdb-cheat-sheet_%E9%A1%B5%E9%9D%A2_1.jpg" alt="gdb-cheat-sheet_页面_1"></p>
+<p><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/gdb-cheat-sheet_%E9%A1%B5%E9%9D%A2_2.jpg" alt="gdb-cheat-sheet_页面_2"></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://zyw9825.github.io">zyw9825</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://zyw9825.github.io/2025/01/11/Linux/GDB/">https://zyw9825.github.io/2025/01/11/Linux/GDB/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://zyw9825.github.io" target="_blank">代码手记</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/GDB/">GDB</a></div><div class="post-share"><div class="social-share" data-image="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/03/11/%E5%8D%95%E7%89%87%E6%9C%BA/STM32%E7%B3%BB%E7%BB%9F%E5%BA%93/" title="STM32系统库学习笔记"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">STM32系统库学习笔记</div></div><div class="info-2"><div class="info-item-1">STM32F103C8T6 •系列：主流系列 STM32F1 •内核：ARM Cortex-M3 •主频：72MHz •RAM：20K（SRAM） •ROM：64K（Flash） •供电：2.0~3.6V（标准 3.3V） •封装：LQFP48 命名规则  引脚定义  GPIO 输入与输出 STM32 GPIO（General Purpose Input/Output，通用输入输出）是 STM32 微控制器中用于与外部设备进行数字信号交互的重要外设模块。 只要可以用高低电平来控制的地方，都可以用 GPIO 来完成。如果控制的是功率较大的设备，需要加入驱动电路。   引脚电平：0V~3.3V，部分引脚可容忍 5V 输入（标有 FT）。   命名方式：GPIOA、GPIOB…等，每组端口最多拥有 Pin0、Pin1…Pin15 共16 个引脚，每个 GPIO 引脚都可以单独配置。   GPIO 结构  所有的 GPIO 都挂载在 APB2 总线上与 CPU 连接。 整体结构可以分为寄存器来驱动器两部分，CPU 通过 APB2...</div></div></div></a><a class="pagination-related" href="/2025/01/11/Linux/LIinux%20%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" title="Linux 常用命令"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Linux 常用命令</div></div><div class="info-2"><div class="info-item-1">Linux 常用命令 Linux 提供了丰富的命令行工具，用于文件操作、进程管理、权限管理等日常任务。以下是常见 Linux 指令的总结。标星为常用，要掌握，其余了解即可。 1. 文件管理    指令 功能 常用     ls 列出当前目录内容 ⭐   cd [目录名] 切换目录 ⭐   pwd 显示当前工作目录 ⭐   mkdir [目录名] 创建目录 ⭐   rmdir [目录名] 删除空目录 ⭐   rm [文件名] 删除文件 ⭐   rm -r [目录名] 递归删除目录及其内容 ⭐   cp [源文件] [目标路径] 复制文件 ⭐   mv [源文件] [目标路径] 移动文件或重命名 ⭐   touch [文件名] 创建空文件 ⭐   find [路径] -name [文件名] 查找文件 ⭐   locate [文件名] 快速查找文件 ⭐   ln -s [源文件路径] [软链接文件名] 软链接    ln [源文件路径] [硬链接文件名] 硬链接    tree 以树状结构显示目录 ⭐    2. 文件内容查看    指令 功能 常用     cat...</div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">zyw9825</div><div class="author-info-description">你且迷这风浪永远二十赶朝暮</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">37</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">29</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">13</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/zyw9825"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/zyw9825" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:zyw_9825@163.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="tencent://AddContact/?fromId=45&amp;fromSubId=1&amp;subcmd=all&amp;uin=765830653&amp;website=www.oicqzone.com" target="_blank" title="添加QQ好友"><i class="fa-brands fa-qq"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#GDB"><span class="toc-number">1.</span> <span class="toc-text">GDB</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E8%B0%83%E8%AF%95%E5%87%86%E5%A4%87"><span class="toc-number">1.1.</span> <span class="toc-text">1. 调试准备</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%90%AF%E5%8A%A8%E5%92%8C%E9%80%80%E5%87%BA-GDB"><span class="toc-number">1.2.</span> <span class="toc-text">2. 启动和退出 GDB</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E6%9F%A5%E7%9C%8B%E4%BB%A3%E7%A0%81"><span class="toc-number">1.3.</span> <span class="toc-text">3. 查看代码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E6%96%AD%E7%82%B9%E6%93%8D%E4%BD%9C"><span class="toc-number">1.4.</span> <span class="toc-text">4. 断点操作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E8%B0%83%E8%AF%95%E5%91%BD%E4%BB%A4"><span class="toc-number">1.5.</span> <span class="toc-text">5. 调试命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cheet-sheet"><span class="toc-number">1.6.</span> <span class="toc-text">cheet sheet</span></a></li></ol></li></ol></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2023 - 2025 By zyw9825</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.5</a></div><div class="footer_custom_text"><img src="https://haiyong.site/img/icp.png"> <a href="https://beian.miit.gov.cn"  style="color:white" target="_blank">陕ICP备2025066278号-1</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>(async () => {
+  const showKatex = () => {
+    document.querySelectorAll('#article-container .katex').forEach(el => el.classList.add('katex-show'))
+  }
+
+  if (!window.katex_js_css) {
+    window.katex_js_css = true
+    await btf.getCSS('https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css')
+    if (true) {
+      await btf.getScript('https://cdn.jsdelivr.net/npm/katex/dist/contrib/copy-tex.min.js')
+    }
+  }
+
+  showKatex()
+})()</script></div><div class="aplayer no-destroy" data-lrctype="0" data-id="922753585" data-order="random" data-listmaxheight="200px" data-theme="#2980b9" data-server="netease" data-type="playlist" data-fixed="true" data-autoplay="true"> </div><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-fluttering-ribbon.min.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/metingjs/dist/Meting.min.js"></script><script>(() => {
+  const destroyAplayer = () => {
+    if (window.aplayers) {
+      for (let i = 0; i < window.aplayers.length; i++) {
+        if (!window.aplayers[i].options.fixed) {
+          window.aplayers[i].destroy()
+        }
+      }
+    }
+  }
+
+  const runMetingJS = () => {
+    typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+  }
+
+  btf.addGlobalFn('pjaxSend', destroyAplayer, 'destroyAplayer')
+  btf.addGlobalFn('pjaxComplete', loadMeting, 'runMetingJS')
+})()</script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>(() => {
+  const pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => fn())
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      const usePjax = true
+      false 
+        ? (usePjax ? pjax.loadUrl('/404.html') : window.location.href = '/404.html')
+        : window.location.href = e.request.responseURL
+    }
+  })
+})()</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

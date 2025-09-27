@@ -1,0 +1,306 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Qt中的事件处理 | 代码手记</title><meta name="author" content="zyw9825"><meta name="copyright" content="zyw9825"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="事件系统 QWidget 类是所有界面组件类的基类，QWidget 类定义了大量与事件处理相关的数据类型和接口函数。 事件的产生与派发 事件的产生 事件表示应用程序中发生的操作或者变化，比如移动鼠标、点击、按键等。在 Qt 中，事件是 QEvent 类及其派生类的实例对象，比如 QKeyEvent 是按键事件类，QMouseEvent 是鼠标事件类。 按照事件的来源，事件可以分为三类：  自生事件">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Qt中的事件处理">
+<meta property="og:url" content="https://zyw9825.github.io/2024/01/11/Qt&PyQt/Qt%E4%B8%AD%E7%9A%84%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86/index.html">
+<meta property="og:site_name" content="代码手记">
+<meta property="og:description" content="事件系统 QWidget 类是所有界面组件类的基类，QWidget 类定义了大量与事件处理相关的数据类型和接口函数。 事件的产生与派发 事件的产生 事件表示应用程序中发生的操作或者变化，比如移动鼠标、点击、按键等。在 Qt 中，事件是 QEvent 类及其派生类的实例对象，比如 QKeyEvent 是按键事件类，QMouseEvent 是鼠标事件类。 按照事件的来源，事件可以分为三类：  自生事件">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg">
+<meta property="article:published_time" content="2024-01-11T03:29:50.000Z">
+<meta property="article:modified_time" content="2024-01-11T03:31:50.000Z">
+<meta property="article:author" content="zyw9825">
+<meta property="article:tag" content="Qt">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Qt中的事件处理",
+  "url": "https://zyw9825.github.io/2024/01/11/Qt&PyQt/Qt%E4%B8%AD%E7%9A%84%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86/",
+  "image": "https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg",
+  "datePublished": "2024-01-11T03:29:50.000Z",
+  "dateModified": "2024-01-11T03:31:50.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "zyw9825",
+      "url": "https://zyw9825.github.io/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/book.svg"><link rel="canonical" href="https://zyw9825.github.io/2024/01/11/Qt&amp;PyQt/Qt%E4%B8%AD%E7%9A%84%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?08ead5bb7d005bd4116f0ec90195f830";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+btf.addGlobalFn('pjaxComplete', () => {
+  _hmt.push(['_trackPageview',window.location.pathname])
+}, 'baidu_analytics')
+</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Qt中的事件处理',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"  media="defer" onload="this.media='all'"><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">37</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">29</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">13</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/shuoshuo/"><i class="fa-fw fas fa-comments"></i><span> 说说</span></a></div><div class="menus_item"><a class="site-page" href="/message/"><i class="fa-fw far fa-comment"></i><span> 留言板</span></a></div></div></div></div><div class="post type-note" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/11ps.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">代码手记</span></a><a class="nav-page-title" href="/"><span class="site-name">Qt中的事件处理</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/shuoshuo/"><i class="fa-fw fas fa-comments"></i><span> 说说</span></a></div><div class="menus_item"><a class="site-page" href="/message/"><i class="fa-fw far fa-comment"></i><span> 留言板</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Qt中的事件处理</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-01-11T03:29:50.000Z" title="发表于 2024-01-11 11:29:50">2024-01-11</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-01-11T03:31:50.000Z" title="更新于 2024-01-11 11:31:50">2024-01-11</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Qt/">Qt</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">1.3k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>4分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="事件系统">事件系统</h1>
+<p>QWidget 类是所有界面组件类的基类，QWidget 类定义了大量与事件处理相关的数据类型和接口函数。</p>
+<h2 id="事件的产生与派发">事件的产生与派发</h2>
+<h3 id="事件的产生">事件的产生</h3>
+<p>事件表示应用程序中发生的操作或者变化，比如移动鼠标、点击、按键等。在 Qt 中，事件是 QEvent 类及其派生类的实例对象，比如 QKeyEvent 是按键事件类，QMouseEvent 是鼠标事件类。</p>
+<p>按照事件的来源，事件可以分为三类：</p>
+<ol>
+<li><mark style="background: #BBFABBA6;">自生事件</mark>：由窗口系统产生。比如 QKeyEvent、QMouseEvent 等。自生事件会进入系统队列，然后被应用程序的事件循环逐个处理。</li>
+<li><mark style="background: #BBFABBA6;">发布事件</mark>：由 Qt 或应用程序产生的事件。比如定时器定时产生的 QTimerEvent 事件，程序调用静态函数 <code>postEvent()</code> 产生的事件。发布事件会进入 Qt 事件队列，然后由应用程序的事件循环进行处理。</li>
+<li><mark style="background: #BBFABBA6;">发送事件</mark>：由 Qt 或应用程序定向发送给某个对象的事件。应用程序调用静态函数 <code>sendEvent()</code> 产生发送事件，由对象的 <code>event()</code> 函数直接处理。</li>
+</ol>
+<blockquote>
+<p><code>postEvent()</code> 函数发布事件后会直接退出，也就是说发布事件的处理是异步的，而<code>sendEvent()</code> 函数发送事件需要等待对象处理完事件以后才退出，也就是说发送事件的处理时同步的。</p>
+</blockquote>
+<h3 id="事件的派发">事件的派发</h3>
+<p>pyqt 应用程序的 main 文件一般是这样的：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>: </span><br><span class="line">    app = QApplication(sys.argv) </span><br><span class="line">    w = Window() </span><br><span class="line">    w.show() </span><br><span class="line">    sys.exit(app.exec_())</span><br></pre></td></tr></table></figure>
+<p><code>app.exec()</code> 运行之后开始应用程序的事件循环，它的功能就是不断地检查系统队列和 Qt 事件队列中有没有未处理的自生事件和发布事件，然后派发给对象去处理。</p>
+<blockquote>
+<p>注意，应用程序的事件循环只处理自生事件和发布事件，而不会处理发送事件，因为发送事件由应用程序直接派发给某个对象，是以同步的方式处理的。</p>
+</blockquote>
+<p>为了避免事件队列不能及时处理而导致界面卡顿，一般会在涉及到大量计算和数据传输的程序中使用多线程，将界面更新和数据处理分别用两个线程处理，就不会出现界面无响应的情况。</p>
+<p>另一种简单的处理方法是在需要长时间占用 CPU 的代码段中调用 QCoreApplication 的静态函数  <code>processEvents()</code> 将事件队列中没有及时处理的事件派发出去。</p>
+<h2 id="事件类与事件类型">事件类与事件类型</h2>
+<p>QEvent 是 Qt 框架中用于表示事件的基本类。应用程序可以使用 QEvent 来处理用户交互、更新 UI 和响应系统事件。QEvent 类提供了以下成员函数：</p>
+<ul>
+<li><strong>type ():</strong> 返回事件的类型。事件类型由 <code>QEvent::Type</code> 枚举定义。</li>
+<li><strong>isAccepted():</strong> 检查事件是否已被接受。 如果事件已被接受，则返回 true；否则返回 false。</li>
+<li><strong>accept():</strong> 接受事件。 这意味着应用程序将处理事件。</li>
+<li><strong>ignore():</strong> 忽略事件。 这意味着应用程序将不处理事件。</li>
+<li><strong>sender():</strong> 返回发送事件的对象。</li>
+<li><strong>receiver ():</strong> 返回接收事件的对象。</li>
+</ul>
+<p>每个事件都有唯一的事件类型，也有对应的事件类，但是有的事件类可以处理多种类型的事件。例如， QMouseEvent 是鼠标事件类，用它创建的事件的类型可以是鼠标双击事件 <code>QEvent::MouseButtonDblClick</code> 或鼠标移动事件 <code>QEvent::MouseMove</code> 等。</p>
+<table>
+<thead>
+<tr>
+<th>Header:</th>
+<th>&lt;QEvent&gt;</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Inherited By:</td>
+<td><a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qactionevent.html">QActionEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qchildevent.html">QChildEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qcloseevent.html">QCloseEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qdragleaveevent.html">QDragLeaveEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qdropevent.html">QDropEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qdynamicpropertychangeevent.html">QDynamicPropertyChangeEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qenterevent.html">QEnterEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qexposeevent.html">QExposeEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qfileopenevent.html">QFileOpenEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qfocusevent.html">QFocusEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qgestureevent.html">QGestureEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qgraphicssceneevent.html">QGraphicsSceneEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qhelpevent.html">QHelpEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qhideevent.html">QHideEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qicondragevent.html">QIconDragEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qinputevent.html">QInputEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qinputmethodevent.html">QInputMethodEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qinputmethodqueryevent.html">QInputMethodQueryEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qmoveevent.html">QMoveEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qpaintevent.html">QPaintEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qplatformsurfaceevent.html">QPlatformSurfaceEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qresizeevent.html">QResizeEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qscrollevent.html">QScrollEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qscrollprepareevent.html">QScrollPrepareEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qshortcutevent.html">QShortcutEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qshowevent.html">QShowEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qstatemachine-signalevent.html">QStateMachine::SignalEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qstatemachine-wrappedevent.html">QStateMachine::WrappedEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qstatustipevent.html">QStatusTipEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qtimerevent.html">QTimerEvent</a>, <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qwhatsthisclickedevent.html">QWhatsThisClickedEvent</a>, and <a target="_blank" rel="noopener" href="http://127.0.0.1:8358/qt_5/doc.qt.io/qt-5/qwindowstatechangeevent.html">QWindowStateChangeEvent</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="事件的处理">事件的处理</h2>
+<p>任何从 QObject 派生的类都可以处理事件，通过重写 <code>event()</code> 函数就可以在接收到事件时继续处理。</p>
+<p><code>event()</code> 的函数原型为：<code>bool QObject: : event(QEvent *e)</code>，通过 <code>e-&gt;type()</code> 就可以判断事件的类型进行相应的处理。</p>
+<p>在重写的 <code>event()</code> 函数里，需要用过函数 <code>accept()</code> 或 <code>ignore()</code> 来确定是否接受或忽略事件。被接受的事件由接受者处理，被忽略的事件则传播到父容器组件的 <code>event()</code> 函数处理，这一过程称为事件的传播。</p>
+<p>QWidget 类是所有界面组件类的基类，它重新实现了函数 <code>event()</code>，并针对一些典型类型的事件定义了专门的事件处理函数，函数 <code>event()</code> 会根据事件类型自动去运行相应的事件处理函数。例如，如果事件类型是 <code>QEvent::MouseMove</code>, 对应的事件处理函数是 <code> mouseMoveEvent ()</code>；如果事件类型是 <code> QEvent::Paint</code>, 对应的事件处理函数是 <code> paintEvent()</code>。QWidget 中定义的典型事件处理函数不能被外部调用，但可以被派生类重新实现。</p>
+<p>如果从 QWidget 或其派生类继承自定义了一个类需要对表中的某种类型的事件进行处理，那么只需重新实现表中与事件类型对应的事件处理函数。如果需要处理的事件在 QWidget 中没有定义事件处理函数，就需要重新实现函数 <code>event()</code>，判断事件类型后调用自己定义的事件处理函数。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://zyw9825.github.io">zyw9825</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://zyw9825.github.io/2024/01/11/Qt&amp;PyQt/Qt%E4%B8%AD%E7%9A%84%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86/">https://zyw9825.github.io/2024/01/11/Qt&amp;PyQt/Qt%E4%B8%AD%E7%9A%84%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://zyw9825.github.io" target="_blank">代码手记</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Qt/">Qt</a></div><div class="post-share"><div class="social-share" data-image="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/01/11/Qt&amp;PyQt/Qt%20Charts%20%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/" title="Qt Charts 快速入门"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Qt Charts 快速入门</div></div><div class="info-2"><div class="info-item-1"> 原书基于 Qt6.2 讲解，本文示例为 PyQt5，版本为 5.15，故 API 有部分差异   Qt Charts 快速入门 Qt Charts模块，基于图形/视图架构，其核心组件是QChartView（继承自QGraphicsView）和QChart（继承自QGraphicsItem）。 一个简单示例 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970#!/usr/bin/env python# -*- coding: utf-8 -*-&quot;&quot;&quot;@Date    : 2024/5/22 21:15@Author  : zyw9825@Version : 1.0@File    : chart_sin.py@Desc    : 绘制一个 sin 曲线&quot;&quot;&quot;import sysimport mathfrom...</div></div></div></a><a class="pagination-related" href="/2024/01/11/Qt&amp;PyQt/%E6%8B%96%E6%94%BE%E4%BA%8B%E4%BB%B6%E4%B8%8E%E6%8B%96%E6%94%BE%E6%93%8D%E4%BD%9C/" title="拖拽事件和拖放操作"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">拖拽事件和拖放操作</div></div><div class="info-2"><div class="info-item-1">概述 拖放提供了一种简单的可视化机制，用户可使用它在应用程序之间和内部传输信息。 拖放由两个操作组成：拖动（drag）和放置（drop）。被拖动的组件称为拖动点（drag site），接收拖动操作的组件称为放置点（drop site）。  [!NOTE] 拖动点和放置点可以是同一个组件，也可以是不同的组件，甚至可以是不同的应用程序。  整个拖动操作可以分解为两个过程：   拖动点启动拖动操作。 一般情况下，当检测到鼠标左键按下就可以启动拖动操作，可以通过重写被拖动组件的 mousePressEvent() 和 mouseMoveEvent() 函数来启动拖动。 启动操作需要创建一个  QDrag 对象描述拖动操作，以及创建一个 QMimeData 对象用于存储拖动操作的格式信息和数据，然后将该 QMimeData 对象赋值给 QDrag 对象的 mimeData  属性。   放置点处理放置操作。 当拖动点被拖动到放置点范围内时，触发 dragEnterEvent() 事件处理函数，一般在该函数中通过 QDrag 对象的 mimeData...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/01/11/Qt&PyQt/Graphic%20View%E7%BB%98%E5%9B%BE/" title="Graphic View绘图"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-11</div><div class="info-item-2">Graphic View绘图</div></div><div class="info-2"><div class="info-item-1">Graphics View 的构成 Qt 为绘制复杂的可交互图形提供了 Graphics View 绘图架构，是一种基于图形项（Graphics Item）的模型/视图模式，与 Model/View 模式类似。 Graphics View 绘图架构主要由 3 部分组成：场景、视图与图形项。    场景 Scene 场景不可见，是一个抽象的管理图形项的容器。主要有以下功能：  提供管理大量图形项的快速接口 将事件传播到每个图形项 管理每个图形项的状态 管理未经变换的渲染功能，主要用于打印  除了图形项以外，场景还有背景层和前景层，通常由 QBrush 指定，也可以重写 drawBackground() 和 drawForeground() 函数来实现自定义的背景和前景。   视图 View 视图组件用于显示部分场景中的内容，可以为一个场景设置多个视图。在图中，虚线框的部分是一个场景，视图 1 比场景大，显示场景的全部内容。默认情况下：  当视图大于场景时，场景在视图的中间部分显示，也可以设置视图的 Alignment 属性控制场景在视图中的显示位置； 当视图小于场景时（视图...</div></div></div></a><a class="pagination-related" href="/2024/01/11/Qt&PyQt/QPainter%E7%BB%98%E5%88%B6%E6%B1%BD%E8%BD%A6%E4%BB%AA%E8%A1%A8%E7%9B%98/" title="QPainter绘制汽车仪表盘"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-11</div><div class="info-item-2">QPainter绘制汽车仪表盘</div></div><div class="info-2"><div class="info-item-1">...</div></div></div></a><a class="pagination-related" href="/2024/01/11/Qt&PyQt/Qt%20Charts%20%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/" title="Qt Charts 快速入门"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-11</div><div class="info-item-2">Qt Charts 快速入门</div></div><div class="info-2"><div class="info-item-1"> 原书基于 Qt6.2 讲解，本文示例为 PyQt5，版本为 5.15，故 API 有部分差异   Qt Charts 快速入门 Qt Charts模块，基于图形/视图架构，其核心组件是QChartView（继承自QGraphicsView）和QChart（继承自QGraphicsItem）。 一个简单示例 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970#!/usr/bin/env python# -*- coding: utf-8 -*-&quot;&quot;&quot;@Date    : 2024/5/22 21:15@Author  : zyw9825@Version : 1.0@File    : chart_sin.py@Desc    : 绘制一个 sin 曲线&quot;&quot;&quot;import sysimport mathfrom...</div></div></div></a><a class="pagination-related" href="/2024/01/11/Qt&PyQt/%E6%8B%96%E6%94%BE%E4%BA%8B%E4%BB%B6%E4%B8%8E%E6%8B%96%E6%94%BE%E6%93%8D%E4%BD%9C/" title="拖拽事件和拖放操作"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-11</div><div class="info-item-2">拖拽事件和拖放操作</div></div><div class="info-2"><div class="info-item-1">概述 拖放提供了一种简单的可视化机制，用户可使用它在应用程序之间和内部传输信息。 拖放由两个操作组成：拖动（drag）和放置（drop）。被拖动的组件称为拖动点（drag site），接收拖动操作的组件称为放置点（drop site）。  [!NOTE] 拖动点和放置点可以是同一个组件，也可以是不同的组件，甚至可以是不同的应用程序。  整个拖动操作可以分解为两个过程：   拖动点启动拖动操作。 一般情况下，当检测到鼠标左键按下就可以启动拖动操作，可以通过重写被拖动组件的 mousePressEvent() 和 mouseMoveEvent() 函数来启动拖动。 启动操作需要创建一个  QDrag 对象描述拖动操作，以及创建一个 QMimeData 对象用于存储拖动操作的格式信息和数据，然后将该 QMimeData 对象赋值给 QDrag 对象的 mimeData  属性。   放置点处理放置操作。 当拖动点被拖动到放置点范围内时，触发 dragEnterEvent() 事件处理函数，一般在该函数中通过 QDrag 对象的 mimeData...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">zyw9825</div><div class="author-info-description">你且迷这风浪永远二十赶朝暮</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">37</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">29</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">13</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/zyw9825"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/zyw9825" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:zyw_9825@163.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="tencent://AddContact/?fromId=45&amp;fromSubId=1&amp;subcmd=all&amp;uin=765830653&amp;website=www.oicqzone.com" target="_blank" title="添加QQ好友"><i class="fa-brands fa-qq"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8B%E4%BB%B6%E7%B3%BB%E7%BB%9F"><span class="toc-number">1.</span> <span class="toc-text">事件系统</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8B%E4%BB%B6%E7%9A%84%E4%BA%A7%E7%94%9F%E4%B8%8E%E6%B4%BE%E5%8F%91"><span class="toc-number">1.1.</span> <span class="toc-text">事件的产生与派发</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8B%E4%BB%B6%E7%9A%84%E4%BA%A7%E7%94%9F"><span class="toc-number">1.1.1.</span> <span class="toc-text">事件的产生</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8B%E4%BB%B6%E7%9A%84%E6%B4%BE%E5%8F%91"><span class="toc-number">1.1.2.</span> <span class="toc-text">事件的派发</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8B%E4%BB%B6%E7%B1%BB%E4%B8%8E%E4%BA%8B%E4%BB%B6%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.2.</span> <span class="toc-text">事件类与事件类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8B%E4%BB%B6%E7%9A%84%E5%A4%84%E7%90%86"><span class="toc-number">1.3.</span> <span class="toc-text">事件的处理</span></a></li></ol></li></ol></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2023 - 2025 By zyw9825</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.5</a></div><div class="footer_custom_text"><img src="https://haiyong.site/img/icp.png"> <a href="https://beian.miit.gov.cn"  style="color:white" target="_blank">陕ICP备2025066278号-1</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>(async () => {
+  const showKatex = () => {
+    document.querySelectorAll('#article-container .katex').forEach(el => el.classList.add('katex-show'))
+  }
+
+  if (!window.katex_js_css) {
+    window.katex_js_css = true
+    await btf.getCSS('https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css')
+    if (true) {
+      await btf.getScript('https://cdn.jsdelivr.net/npm/katex/dist/contrib/copy-tex.min.js')
+    }
+  }
+
+  showKatex()
+})()</script></div><div class="aplayer no-destroy" data-lrctype="0" data-id="922753585" data-order="random" data-listmaxheight="200px" data-theme="#2980b9" data-server="netease" data-type="playlist" data-fixed="true" data-autoplay="true"> </div><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-fluttering-ribbon.min.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/metingjs/dist/Meting.min.js"></script><script>(() => {
+  const destroyAplayer = () => {
+    if (window.aplayers) {
+      for (let i = 0; i < window.aplayers.length; i++) {
+        if (!window.aplayers[i].options.fixed) {
+          window.aplayers[i].destroy()
+        }
+      }
+    }
+  }
+
+  const runMetingJS = () => {
+    typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+  }
+
+  btf.addGlobalFn('pjaxSend', destroyAplayer, 'destroyAplayer')
+  btf.addGlobalFn('pjaxComplete', loadMeting, 'runMetingJS')
+})()</script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>(() => {
+  const pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => fn())
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      const usePjax = true
+      false 
+        ? (usePjax ? pjax.loadUrl('/404.html') : window.location.href = '/404.html')
+        : window.location.href = e.request.responseURL
+    }
+  })
+})()</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

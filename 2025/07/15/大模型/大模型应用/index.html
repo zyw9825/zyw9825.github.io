@@ -1,0 +1,911 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>大模型应用 | 代码手记</title><meta name="author" content="zyw9825"><meta name="copyright" content="zyw9825"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="大模型架构  整体架构解释 该架构采用分层设计，从底层基础设施到顶层应用形成完整生态：  基础设施层 提供计算、存储和网络资源； 云原生层 实现容器化和自动化部署； 模型层 为核心能力层，包含预训练模型和部署工具； 应用技术层 整合关键技术（如 RAG、Agent），提升模型实用性； 平台层 提供工具链，降低开发门槛； 应用层 面向具体场景，交付最终产品。  这种模块化设计支持灵活扩展，适用于不同">
+<meta property="og:type" content="article">
+<meta property="og:title" content="大模型应用">
+<meta property="og:url" content="https://zyw9825.github.io/2025/07/15/%E5%A4%A7%E6%A8%A1%E5%9E%8B/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8/index.html">
+<meta property="og:site_name" content="代码手记">
+<meta property="og:description" content="大模型架构  整体架构解释 该架构采用分层设计，从底层基础设施到顶层应用形成完整生态：  基础设施层 提供计算、存储和网络资源； 云原生层 实现容器化和自动化部署； 模型层 为核心能力层，包含预训练模型和部署工具； 应用技术层 整合关键技术（如 RAG、Agent），提升模型实用性； 平台层 提供工具链，降低开发门槛； 应用层 面向具体场景，交付最终产品。  这种模块化设计支持灵活扩展，适用于不同">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg">
+<meta property="article:published_time" content="2025-07-14T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-09-27T11:09:07.743Z">
+<meta property="article:author" content="zyw9825">
+<meta property="article:tag" content="大模型应用">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "大模型应用",
+  "url": "https://zyw9825.github.io/2025/07/15/%E5%A4%A7%E6%A8%A1%E5%9E%8B/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8/",
+  "image": "https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg",
+  "datePublished": "2025-07-14T16:00:00.000Z",
+  "dateModified": "2025-09-27T11:09:07.743Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "zyw9825",
+      "url": "https://zyw9825.github.io/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/book.svg"><link rel="canonical" href="https://zyw9825.github.io/2025/07/15/%E5%A4%A7%E6%A8%A1%E5%9E%8B/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?08ead5bb7d005bd4116f0ec90195f830";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+btf.addGlobalFn('pjaxComplete', () => {
+  _hmt.push(['_trackPageview',window.location.pathname])
+}, 'baidu_analytics')
+</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '大模型应用',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"  media="defer" onload="this.media='all'"><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">37</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">29</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">13</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/shuoshuo/"><i class="fa-fw fas fa-comments"></i><span> 说说</span></a></div><div class="menus_item"><a class="site-page" href="/message/"><i class="fa-fw far fa-comment"></i><span> 留言板</span></a></div></div></div></div><div class="post type-note" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/11ps.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">代码手记</span></a><a class="nav-page-title" href="/"><span class="site-name">大模型应用</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/shuoshuo/"><i class="fa-fw fas fa-comments"></i><span> 说说</span></a></div><div class="menus_item"><a class="site-page" href="/message/"><i class="fa-fw far fa-comment"></i><span> 留言板</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">大模型应用</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-07-14T16:00:00.000Z" title="发表于 2025-07-15 00:00:00">2025-07-15</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-09-27T11:09:07.743Z" title="更新于 2025-09-27 19:09:07">2025-09-27</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">大模型</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">7.3k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>25分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="大模型架构">大模型架构</h1>
+<p><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/file-20250417173654401.png" alt=""></p>
+<p><strong>整体架构解释</strong></p>
+<p>该架构采用分层设计，从底层基础设施到顶层应用形成完整生态：</p>
+<ol>
+<li><strong>基础设施层</strong> 提供计算、存储和网络资源；</li>
+<li><strong>云原生层</strong> 实现容器化和自动化部署；</li>
+<li><strong>模型层</strong> 为核心能力层，包含预训练模型和部署工具；</li>
+<li><strong>应用技术层</strong> 整合关键技术（如 RAG、Agent），提升模型实用性；</li>
+<li><strong>平台层</strong> 提供工具链，降低开发门槛；</li>
+<li><strong>应用层</strong> 面向具体场景，交付最终产品。</li>
+</ol>
+<p>这种模块化设计支持灵活扩展，适用于不同规模和领域的 AI 应用开发。</p>
+<hr>
+<p><strong>1. 基础设施层</strong></p>
+<ul>
+<li><strong>GPU/TPU/昇腾</strong> ：高性能计算硬件，加速AI模型训练和推理（如NVIDIA GPU、Google TPU、华为昇腾芯片）。</li>
+<li><strong>CPU</strong> ：通用处理器，负责基础计算任务。</li>
+<li><strong>RAM</strong> ：内存，临时存储数据以提高访问速度。</li>
+<li><strong>HDD</strong> ：硬盘存储，长期保存数据。</li>
+<li><strong>Network</strong> ：网络通信，连接各组件并传输数据。</li>
+</ul>
+<hr>
+<p><strong>2. 云原生层</strong></p>
+<ul>
+<li><strong>Docker</strong> ：容器化工具，封装应用及其依赖，实现标准化部署。</li>
+<li><strong>K8S (Kubernetes)</strong> ：容器编排平台，管理容器集群的调度、扩展和负载均衡。</li>
+</ul>
+<hr>
+<p><strong>3. 模型层</strong></p>
+<ul>
+<li>
+<p><strong>对话模型</strong> ：</p>
+<ul>
+<li><strong>ChatGPT</strong> ：OpenAI开发的超大规模语言模型，擅长对话理解和生成。</li>
+<li><strong>Deepseek</strong> ：开源对话模型，支持多语言交互。</li>
+</ul>
+</li>
+<li>
+<p><strong>嵌入模型</strong> ：</p>
+<ul>
+<li><strong>nomic-embed-text</strong> ：文本嵌入模型，将文本转化为向量表示。</li>
+<li><strong>BGE</strong> ：百度文心一言系列的嵌入模型，用于语义相似度计算。</li>
+</ul>
+</li>
+<li>
+<p><strong>语音模型</strong> ：</p>
+<ul>
+<li><strong>Whisper</strong> ：OpenAI的语音识别模型，支持多语言转录。</li>
+<li><strong>Bark</strong> ：语音合成模型，可生成自然的人声。</li>
+</ul>
+</li>
+<li>
+<p><strong>图像模型</strong> ：</p>
+<ul>
+<li><strong>Stable Diffusion</strong> ：开源图像生成模型，根据文本描述生成图片。</li>
+<li><strong>DALL·E 2</strong> ：OpenAI的图像生成模型，支持复杂场景创作。</li>
+</ul>
+</li>
+<li>
+<p><strong>代码模型</strong> ：</p>
+<ul>
+<li><strong>Copilot</strong> ：GitHub的代码生成工具，基于Codex模型。</li>
+<li><strong>CodeGeeX</strong> ：微软的代码助手，支持多种编程语言。</li>
+</ul>
+</li>
+<li>
+<p><strong>LLM 部署工具</strong> ：</p>
+<ul>
+<li><strong>Ollama</strong> ：轻量级模型部署框架，简化本地运行大模型。</li>
+<li><strong>VLLM</strong> ：高效推理引擎，优化大模型的批量推理性能。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>4. 应用技术层</strong></p>
+<ul>
+<li><strong>Agent智能体</strong> ：自主决策的AI代理，通过交互完成复杂任务（如AutoGen）。</li>
+<li><strong>COT思维链</strong> ：Chain of Thought（思维链）技术，让模型逐步推理解决问题。</li>
+<li><strong>NL2SQL</strong> ：自然语言到SQL转换工具，将用户指令转为数据库查询语句。</li>
+<li><strong>向量数据库</strong> ：存储和检索高维向量（如Qdrant、Milvus），用于语义搜索。</li>
+<li><strong>RAG检索增强生成</strong> ：结合检索（R）和生成（G）技术，提升回答准确性。</li>
+<li><strong>Workflow任务编排</strong> ：自动化流程管理工具（如LangChain Agents）。</li>
+<li><strong>Fine-tuning微调</strong> ：针对特定任务微调预训练模型，提升领域适配性。</li>
+<li><strong>Prompt提示词工程</strong> ：优化输入提示的设计，引导模型输出符合预期的结果。</li>
+</ul>
+<hr>
+<p><strong>5. 平台层</strong></p>
+<ul>
+<li>
+<p><strong>通用应用开发</strong> ：</p>
+<ul>
+<li><strong>Coze</strong> ：低代码开发平台，快速构建AI应用。</li>
+<li><strong>Dify</strong> ：对话式AI开发框架，支持多模态交互。</li>
+</ul>
+</li>
+<li>
+<p><strong>RAG构建</strong> ：</p>
+<ul>
+<li><strong>RAG Flow</strong> ：端到端RAG系统搭建工具。</li>
+<li><strong>LlamaIndex</strong> ：构建知识库索引和检索的库。</li>
+</ul>
+</li>
+<li>
+<p><strong>工作流编排</strong> ：</p>
+<ul>
+<li><strong>LangChain</strong> ：构建复杂AI工作流的框架。</li>
+<li><strong>n8n</strong> ：可视化工作流自动化工具。</li>
+</ul>
+</li>
+<li>
+<p><strong>数据/数据库问答</strong> ：</p>
+<ul>
+<li><strong>DB-GPT</strong> ：数据库问答模型，直接解析数据库内容。</li>
+<li><strong>Chat2Query</strong> ：将自然语言转为数据库查询的工具。</li>
+</ul>
+</li>
+<li>
+<p><strong>Agent开发</strong> ：</p>
+<ul>
+<li><strong>AutoGPT</strong> ：自主规划任务的AI代理。</li>
+<li><strong>AutoGen</strong> ：Meta开发的多Agent协作框架。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>6. 应用层</strong></p>
+<ul>
+<li>
+<p><strong>生产力工具</strong> ：</p>
+<ul>
+<li><strong>文档生成</strong> ：自动生成报告、邮件等文本。</li>
+<li><strong>代码辅助</strong> ：实时代码补全和调试建议。</li>
+</ul>
+</li>
+<li>
+<p><strong>知识管理与检索</strong> ：</p>
+<ul>
+<li><strong>企业知识库</strong> ：构建私有知识库并支持语义搜索。</li>
+<li><strong>高精度问答</strong> ：基于知识库的精准答案提取。</li>
+</ul>
+</li>
+<li>
+<p><strong>复杂任务执行</strong> ：</p>
+<ul>
+<li><strong>智能工作流</strong> ：自动化跨系统的业务流程。</li>
+<li><strong>智能助手</strong> ：多模态交互的虚拟助手（如客服机器人）。</li>
+</ul>
+</li>
+<li>
+<p><strong>数据分析与决策</strong> ：</p>
+<ul>
+<li><strong>自然语言查询数DB</strong> ：通过口语化指令分析数据库。</li>
+<li><strong>市场报告解读</strong> ：自动解析和总结行业报告。</li>
+</ul>
+</li>
+<li>
+<p><strong>垂直行业解决方案</strong> ：</p>
+<ul>
+<li><strong>AI辅助诊断</strong> ：医疗影像分析和疾病预测。</li>
+<li><strong>智能家教</strong> ：个性化教育辅导系统。</li>
+</ul>
+</li>
+</ul>
+<h1 id="安装-ollama-并下载对应模型">安装 ollama 并下载对应模型</h1>
+<h2 id="ollama-是什么">ollama 是什么</h2>
+<p>Ollama 是一个 <strong>本地化大语言模型（LLM）运行框架</strong>，允许用户在个人电脑上轻松下载、运行和管理开源大模型（如 LLaMA、Mistral、DeepSeek 等），无需依赖云端服务。</p>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>本地运行模型</strong></td>
+<td>直接在电脑上运行 LLM，完全离线，保护隐私。</td>
+</tr>
+<tr>
+<td><strong>一键下载模型</strong></td>
+<td>通过 <code>ollama pull</code> 命令下载模型（如 <code>llama3</code>、<code>deepseek-coder</code>）。</td>
+</tr>
+<tr>
+<td><strong>简化部署</strong></td>
+<td>自动处理依赖（如 GPU 加速、量化），无需手动配置复杂环境。</td>
+</tr>
+<tr>
+<td><strong>多平台支持</strong></td>
+<td>支持 Windows、macOS、Linux（包括 ARM 设备如 Raspberry Pi）。</td>
+</tr>
+<tr>
+<td><strong>REST API 支持</strong></td>
+<td>提供本地 API，方便与其他工具（如 Open WebUI、LangChain）集成</td>
+</tr>
+</tbody>
+</table>
+<h2 id="下载并安装-ollama">下载并安装 ollama</h2>
+<p>教程： <a target="_blank" rel="noopener" href="https://www.runoob.com/ollama/ollama-install.html">https://www.runoob.com/ollama/ollama-install.html</a></p>
+<ul>
+<li>win 安装时可以指定路径：<code>OllamaSetup.exe /DIR=&quot;D:\Ollama&quot;</code></li>
+<li>安装完成输入命令检查：</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\imp&gt; ollama --version</span><br><span class="line">ollama version is 0.6.5</span><br></pre></td></tr></table></figure>
+<h2 id="下载本地模型">下载本地模型</h2>
+<p>Ollama 支持的模型可以访问：<a target="_blank" rel="noopener" href="https://ollama.com/library">https://ollama.com/library</a></p>
+<p>具体下载哪个版本的模型要根据本地电脑配置选择，不同版本的同类模型主要是参数大小不同，比如有 1.5b，7b，11b 等等。</p>
+<hr>
+<p><strong>如何修改 Ollama 默认的模型安装路径？</strong></p>
+<p>Ollama 默认会将模型下载到 C 盘用户目录下的 <code>.ollama</code> 文件夹（如 <code>C:\Users\imp\.ollama</code>）。</p>
+<p>可以通过通过环境变量 <code>OLLAMA_MODELS</code> 修改模型路径：</p>
+<ol>
+<li>打开系统环境变量设置</li>
+<li>新建用户变量：
+<ul>
+<li>在 &quot;用户变量&quot;部分，点击 <strong>“新建”</strong>。</li>
+<li>输入以下内容：
+<ul>
+<li><strong>变量名</strong>：<code>OLLAMA_MODELS</code></li>
+<li><strong>变量值</strong>：<code>D:\ollama_models</code>（或其他你想要的路径）</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>点击 “<strong>确定</strong>” 保存设置。</li>
+<li>关闭所有终端/Ollama 相关程序，并<strong>重新启动</strong> Ollama 服务（或重启电脑）。</li>
+</ol>
+<hr>
+<p><strong>运行 deepseek-r1:1.5b 版本</strong>：</p>
+<p>后缀 <code>:1.5b</code> 表示运行 deepseek-r1 参数量为 1.5b 的版本，如果不加后缀 <code>ollama run deepseek-r1</code> 则默认运行 7b 的版本。</p>
+<p>首次运行时，需要先下载模型。下载完成后，就可以在命令行中进行对话。</p>
+<p>要退出对话可以输入 <code>/bye</code> 或者按下快捷键 <code>Ctrl + d</code>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\imp&gt; ollama run deepseek-r1:1.5b</span><br><span class="line">pulling manifest</span><br><span class="line">pulling aabd4debf0c8... 100% ▕███████████████ ▏ 1.1 GB/1.1 GB  2.1 MB/s      0s</span><br><span class="line">pulling 369ca498f347... 100% ▕████████████████▏  387 B</span><br><span class="line">pulling 6e4c38e1172f... 100% ▕████████████████▏ 1.1 KB</span><br><span class="line">pulling f4d24e9138dd... 100% ▕████████████████▏  148 B</span><br><span class="line">pulling a85fe2a2e58e... 100% ▕████████████████▏  487 B</span><br><span class="line">verifying sha256 digest</span><br><span class="line">writing manifest</span><br><span class="line">success</span><br><span class="line">&gt;&gt;&gt; 你好</span><br><span class="line">&lt;think&gt;</span><br><span class="line"></span><br><span class="line">&lt;/think&gt;</span><br><span class="line"></span><br><span class="line">你好！很高兴见到你，有什么我可以帮忙的吗？</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; Send a message (/? <span class="keyword">for</span> <span class="built_in">help</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="Ollama-常用命令">Ollama 常用命令</h2>
+<p>Ollama 提供了多种命令行工具（CLI）供用户与本地运行的模型进行交互，可以用 <code>ollama --help</code> 查看包含有哪些命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\imp&gt; ollama --<span class="built_in">help</span></span><br><span class="line">Large language model runner</span><br><span class="line"></span><br><span class="line">Usage:</span><br><span class="line">  ollama [flags]</span><br><span class="line">  ollama [<span class="built_in">command</span>]</span><br><span class="line"></span><br><span class="line">Available Commands:</span><br><span class="line">  serve       Start ollama</span><br><span class="line">  create      Create a model from a Modelfile</span><br><span class="line">  show        Show information <span class="keyword">for</span> a model</span><br><span class="line">  run         Run a model</span><br><span class="line">  stop        Stop a running model</span><br><span class="line">  pull        Pull a model from a registry</span><br><span class="line">  push        Push a model to a registry</span><br><span class="line">  list        List models</span><br><span class="line">  ps          List running models</span><br><span class="line">  <span class="built_in">cp</span>          Copy a model</span><br><span class="line">  <span class="built_in">rm</span>          Remove a model</span><br><span class="line">  <span class="built_in">help</span>        Help about any <span class="built_in">command</span></span><br><span class="line"></span><br><span class="line">Flags:</span><br><span class="line">  -h, --<span class="built_in">help</span>      <span class="built_in">help</span> <span class="keyword">for</span> ollama</span><br><span class="line">  -v, --version   Show version information</span><br><span class="line"></span><br><span class="line">Use <span class="string">&quot;ollama [command] --help&quot;</span> <span class="keyword">for</span> more information about a <span class="built_in">command</span>.</span><br></pre></td></tr></table></figure>
+<p>除了在命令行交互以外，Ollama 还提供了基于 HTTP 的 API，允许开发者通过编程方式与模型进行交互。</p>
+<h2 id="Ollama-Open-WebUI">Ollama + Open WebUI</h2>
+<p>Open WebUI 是一个基于 Web 的交互界面，可以让你像使用 ChatGPT 一样在浏览器中与本地运行的 Ollama 模型交互。</p>
+<ul>
+<li>开源地址： <a target="_blank" rel="noopener" href="https://github.com/open-webui/open-webui">https://github.com/open-webui/open-webui</a></li>
+<li>官方文档： <a target="_blank" rel="noopener" href="https://docs.openwebui.com/">https://docs.openwebui.com/</a></li>
+</ul>
+<p>Open WebUI 有多种安装方式，使用 Docker 安装或者 Python pip 安装是最常用的方式，具体步骤可以在 github 主页查看。</p>
+<p>在使用 Python 软件包安装程序 pip 进行安装前，请确保你使用的是<strong>Python 3.11</strong>，以避免出现兼容性问题。</p>
+<p>打开终端并运行以下命令来安装 Open WebUI：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install open-webui</span><br></pre></td></tr></table></figure>
+<p>安装后，你可以通过执行以下命令启动 Open WebUI：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">open-webui serve</span><br></pre></td></tr></table></figure>
+<p>这将启动 Open WebUI 服务器，然后就可以通过 <a target="_blank" rel="noopener" href="http://localhost:8080/">http://localhost:8080/</a> 来访问。</p>
+<h1 id="基于-VSCode-的本地大模型服务">基于 VSCode 的本地大模型服务</h1>
+<h2 id="安装-Cline-插件并配置大模型">安装 Cline 插件并配置大模型</h2>
+<p>Cline 是一款强大的 AI 编程工具，支持多种免费模型，能够显著提高编程效率。Cline 是目前为数不多可以支持 MCP 功能的客户端之一，其它还包括 Claude Desktop、Cursor 等等。</p>
+<p>在 VSCode 中安装 Cline 插件：</p>
+<ol>
+<li>打开 VSCode</li>
+<li>点击插件图标</li>
+<li>搜索&quot;Cline&quot;并安装</li>
+<li>安装完成后，左侧会出现一个小机器人图标。</li>
+</ol>
+<hr>
+<p>计划/执行模式切换是 Cline AI 编程助手在 3.2 版本中推出的一项创新功能。通过这一功能，Cline 能够在两种模式之间智能切换：</p>
+<ol>
+<li><strong>计划模式（Plan Mode）</strong>：Cline 以架构师的角色运行，负责收集信息、提出澄清性问题并设计解决方案。</li>
+<li><strong>执行模式（Act Mode）</strong>：Cline 专注于执行计划模式中规划好的任务，按照既定的方案逐步完成具体操作。</li>
+</ol>
+<p>你可以在 Cline 的右下角切换 Plan 和 Act 模式。基本的使用方式就是现在计划模式中描述需求，AI 会根据你的任务生成可行方案，你觉得满意的话就切换到执行模式，AI 会根据刚才的对话记录完成操作。</p>
+<hr>
+<p>在使用之前我们需要先分别配置计划模式和执行模式要使用的模型。你可以选择各个大模型厂商提供的 API，也可以选择本地安装的 ollama 大模型，配置的步骤如下：</p>
+<p><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/file-20250409152618703.png" alt="|500"></p>
+<p>受本地设备的硬件性能影响，想要流畅使用并不容易，更推荐使用各个大模型厂商官方的 API 服务。</p>
+<h2 id="配置-MCP-服务">配置 MCP 服务</h2>
+<h3 id="什么是-MCP-服务？">什么是 MCP 服务？</h3>
+<p>官方主页： <a target="_blank" rel="noopener" href="https://modelcontextprotocol.io/introduction">https://modelcontextprotocol.io/introduction</a></p>
+<p>MCP 全称是 Model Context Protocol，即模型上下文协议，由 Claude 的母公司 Anthropic 于 24 年底开源发布。简单来说，MCP 就是 AI 大模型的标准化工具箱，大模型可以利用这些工具与外部互动，获取信息并完成具体的任务。</p>
+<p>MCP 服务作为 AI 与外部工具的中间层，代替人类访问并且操作外部工具（比如浏览器、文件系统、数据库等），每个 MCP Server 都专精一类工作，有的负责和读写浏览器，有的负责读取本地文件等。</p>
+<p>MCP Server 通常是运行在本地的 nodejs 或者 python 程序，大模型通过操作系统的标准输入输出通道（stdio）来以规定的消息格式来调用它，MCP Server 接到这些请求后，通过自身功能或者访问外部 API 来完成具体的任务。</p>
+<p>MCP 的最大优点在于整合了之前各家大模型不同的标准，市面上几乎所有的大模型都可以接入 MCP。</p>
+<p><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/file-20250409153635509.png" alt="|500"></p>
+<h3 id="安装-nodejs">安装 nodejs</h3>
+<p>前面提到，MCP Server 本质就是运行在本地的一段 nodejs 程序（或 Python 程序），所以在使用 MCP 服务前我们要确保本地安装 nodejs。</p>
+<p>安装教程： <a target="_blank" rel="noopener" href="https://www.runoob.com/nodejs/nodejs-install-setup.html">https://www.runoob.com/nodejs/nodejs-install-setup.html</a></p>
+<h3 id="在-Cline-中配置-MCP-服务">在 Cline 中配置 MCP 服务</h3>
+<blockquote>
+<p>参考视频： <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1AnQNYxEsy/?spm_id_from=333.337.search-card.all.click&amp;vd_source=c37ae10385a4b5aea64d2fa5304fd017">https://www.bilibili.com/video/BV1AnQNYxEsy/?spm_id_from=333.337.search-card.all.click&amp;vd_source=c37ae10385a4b5aea64d2fa5304fd017</a></p>
+</blockquote>
+<ul>
+<li>官方提供的参考 MCP服务器： <a target="_blank" rel="noopener" href="https://github.com/modelcontextprotocol/servers">https://github.com/modelcontextprotocol/servers</a></li>
+<li>第三方 MCP 服务器集合： <a target="_blank" rel="noopener" href="https://github.com/punkpeye/awesome-mcp-servers">https://github.com/punkpeye/awesome-mcp-servers</a></li>
+</ul>
+<p>点击右上角的 MCP Server 按钮，在 Marketplace 中搜索你想使用的任何 MCP，并按照大模型的指示进行配置。</p>
+<p><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/file-20250409165327272.png" alt="|500"></p>
+<p>找到你想使用的 MCP 服务器，点击 install，然后根据 AI 的指引就可以完成配置，也可以参考上面的参考视频。如果顺利的话，在 Installed 标签页看到 MCP 亮起小绿灯，就表示配置完成：</p>
+<p><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/file-20250409174606126.png" alt="|500"></p>
+<hr>
+<p>对于 Cline 来说，最重要的就是生成的这个配置文件 <code>C:\Users\imp\AppData\Roaming\Code\User\globalStorage\saoudrizwan.claude-dev\settings\cline_mcp_settings.json</code> 。它定义了 MCP 服务的运行方式、环境变量和启动命令，直接决定了 Cline 插件如何与外部服务交互。如果配置文件出错或配置不当，MCP 服务就无法正常启动或工作。</p>
+<ul>
+<li>mcpServers 对象中的每个键对应一个 MCP 服务，指定了该服务的启动方式。</li>
+<li>command 和 args 字段告诉 Cline 如何执行 MCP 服务的可执行文件或脚本。</li>
+<li>env 字段（如 GITHUB_PERSONAL_ACCESS_TOKEN）为服务提供了必要的认证信息或运行时配置。</li>
+<li>配置文件的结构允许你添加多个 MCP 服务（例如 GitHub、GitLab、自定义服务等），并为每个服务定制启动方式。</li>
+</ul>
+<p>比如，这是我添加了 github MCP Server 和 filesystem MCP Server 后，cline_mcp_settings.json 变为：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;mcpServers&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;github&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;command&quot;</span><span class="punctuation">:</span> <span class="string">&quot;cmd&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;args&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="string">&quot;/c&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="string">&quot;npx&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="string">&quot;-y&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="string">&quot;@modelcontextprotocol/server-github&quot;</span></span><br><span class="line">      <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;env&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;GITHUB_PERSONAL_ACCESS_TOKEN&quot;</span><span class="punctuation">:</span> <span class="string">&quot;xxxx&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;disabled&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;autoApprove&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;filesystem&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;command&quot;</span><span class="punctuation">:</span> <span class="string">&quot;cmd&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;args&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="string">&quot;/c&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="string">&quot;npx&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="string">&quot;-y&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="string">&quot;@modelcontextprotocol/server-filesystem&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="string">&quot;f:/工作/大模型/VSCode Demo&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="string">&quot;C:/Users/imp/Desktop&quot;</span></span><br><span class="line">      <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;disabled&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;autoApprove&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<h3 id="在-Cline-中使用-MCP-服务">在 Cline 中使用 MCP 服务</h3>
+<p>MCP 服务配置完成后，就可以在 Cline 中使用对应的相关服务。以 github 为例，可以读写远程仓库；filesystem 可以读写本地文件。</p>
+<p><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/file-20250409175656873.png" alt="|500"></p>
+<h1 id="自建-MCP-服务">自建 MCP 服务</h1>
+<h1 id="Docker-的安装">Docker 的安装</h1>
+<p>WSL2 安装官方教程： <a target="_blank" rel="noopener" href="https://learn.microsoft.com/en-us/windows/wsl/install#manual-installation-steps">https://learn.microsoft.com/en-us/windows/wsl/install#manual-installation-steps</a></p>
+<p>windows 电脑安装 docker 参考官方教程： <a target="_blank" rel="noopener" href="https://docs.docker.com/desktop/setup/install/windows-install/">https://docs.docker.com/desktop/setup/install/windows-install/</a></p>
+<p>以下是几个比较关键的操作：</p>
+<ul>
+<li>修改 Docker 的安装路径。需要使用命令行进行安装，切换到安装包所在目录，右键，在终端打开，输入：<code>'.\Docker Desktop Installer.exe' install --installation-dir=&quot;D:\Software\Docker&quot;</code> 。</li>
+<li>修改镜像存放路径。打开 docker desktop 设置，点击 Resource，更改 Disk image location：</li>
+</ul>
+<p><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/file-20250410220052632.png" alt="|500"></p>
+<ul>
+<li>更改镜像源。打开 docker desktop 设置，点击 Docker Engine，添加镜像源。镜像源变得很快，如果不能用了，百度换个新的。</li>
+</ul>
+<p><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/file-20250410220201228.png" alt="|500"></p>
+<ul>
+<li>更改完以后记得重启。</li>
+</ul>
+<h1 id="搭建-RAGFlow-知识库">搭建 RAGFlow 知识库</h1>
+<h2 id="RAGFlow-是什么？">RAGFlow 是什么？</h2>
+<p>RAGFlow 是一款基于深度文档理解构建的开源 RAG（Retrieval-Augmented Generation，检索增强生成）引擎。RAGFlow 可以为各种规模的企业及个人提供一套精简的 RAG 工作流程，结合大语言模型（LLM）针对用户各类不同的复杂格式数据提供可靠的问答以及有理有据的引用。</p>
+<p>Ragflow 仓库： <a target="_blank" rel="noopener" href="https://github.com/infiniflow/ragflow">https://github.com/infiniflow/ragflow</a></p>
+<p>RAGFlow 主页： <a target="_blank" rel="noopener" href="https://ragflow.io/">https://ragflow.io/</a></p>
+<h2 id="为什么要使用-RAG-技术？RAG-和模型微调的区别？">为什么要使用 RAG 技术？RAG 和模型微调的区别？</h2>
+<ul>
+<li>大模型的幻觉问题是指模型生成与输入无关、不符合事实或逻辑上不合理的内容。</li>
+<li>微调技术和 RAG 技术：
+<ul>
+<li>微调：在已有的预训练模型基础上，再结合特定任务的数据集进一步对其进行训练，使得模型在这一领域中表现更好；</li>
+<li>RAG：在生成回答之前，通过信息检索从外部知识库中查找与问题相关的知识，增强生成过程中的信息来源，从而提升生成的质量和准确性。</li>
+<li>共同点：都是为了赋予模型某个领域的特定知识，解决大模型的幻觉问题。</li>
+</ul>
+</li>
+<li>RAG （Retrieval-Augmented Generation）的原理:
+<ul>
+<li>检索（Retrieval）：当用户提出问题时，系统会从外部的知识库中检索出与用户输入相关的内容。</li>
+<li>增强（Augmentation）：系统将检索到的信息与用户的输入结合，扩展模型的上下文。然后再传给生成模型（也就是 Deepseek）；</li>
+<li>生成（Generation）：生成模型基于增强后的输入生成最终的回答。由于这一回答参考了外部知识库中的内容，因此更加准确可读。</li>
+</ul>
+</li>
+</ul>
+<p><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/file-20250410143334013.png" alt="|500"></p>
+<p>大模型可以简单的分为Chat模型和Embedding模型。</p>
+<p>检索的过程需要使用 Embedding（嵌入）模型对知识库文件进行解析，Embedding 的主要作用就是将自然语言转化为机器可以理解的高维向量。</p>
+<p>RAGFlow配置时需要同时配置这两种模型。嵌入模型也可以用Ollama在本地运行。</p>
+<h2 id="windows-下安装-RAGFlow">windows 下安装 RAGFlow</h2>
+<blockquote>
+<p>[!warning] 安装 RAGFlow 前提：</p>
+<ul>
+<li>
+<p>CPU &gt;= 4 核</p>
+</li>
+<li>
+<p>RAM &gt;= 16 GB</p>
+</li>
+<li>
+<p>Disk &gt;= 50 GB</p>
+</li>
+<li>
+<p>Docker &gt;= 24.0.0 &amp; Docker Compose &gt;= v2.26.1</p>
+</li>
+</ul>
+<p>使用 <code>docker --version</code> 来查看你的 docker 版本。</p>
+</blockquote>
+<p>安装教程可以参考官方文档： <a target="_blank" rel="noopener" href="https://ragflow.io/docs/dev/">https://ragflow.io/docs/dev/</a></p>
+<p>参考视频： <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1WiP2ezE5a/?spm_id_from=333.337.search-card.all.click">https://www.bilibili.com/video/BV1WiP2ezE5a/?spm_id_from=333.337.search-card.all.click</a></p>
+<hr>
+<p><strong>修改Ollama环境变量</strong></p>
+<p>因为RAGFlow是运行在Windows的虚拟机WSL里面的。默认情况下，OLLAMA绑定在本地回环地址<code>127.0.0.1:11434</code>，为了让虚拟机里面的RAGFlow正常访问，需要将Ollama的监听地址设置为<code>0.0.0.0:11434</code>，11434是Ollama的默认端口。可以通过通过环境变量 <code>OLLAMA_MODELS</code> 修改Ollama的监听地址 ：</p>
+<ol>
+<li>打开系统环境变量设置</li>
+<li>新建用户变量：
+<ul>
+<li>在 &quot;用户变量&quot;部分，点击 <strong>“新建”</strong>。</li>
+<li>输入以下内容：
+<ul>
+<li><strong>变量名</strong>：<code>OLLAMA_HOST</code></li>
+<li><strong>变量值</strong>：<code>0.0.0.0:11434</code>（或其他你想要的路径）</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>点击 “<strong>确定</strong>” 保存设置。</li>
+<li>关闭所有终端/Ollama 相关程序，并<strong>重新启动</strong> Ollama 服务（或重启电脑）。</li>
+</ol>
+<p><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/image-20250410151732742.png" alt="image-20250410151732742"></p>
+<hr>
+<p><strong>下面开始安装RAGFlow</strong>：</p>
+<ol>
+<li>
+<p>克隆仓库到本地：<code>git clone https://github.com/infiniflow/ragflow.git</code>。如果网络不通畅的话，可以直接在 github 上下载压缩包。</p>
+</li>
+<li>
+<p>下载好源代码后，修改 <code>ragflow-main\docker\.env</code> 这个配置文件，选择默认带有Embedding模型的版本：<br>
+<img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/image-20250410153826058.png" alt="image-20250410153826058|731"></p>
+</li>
+<li>
+<p>使用预先构建的 Docker 镜像并启动服务器，打开cmd：</p>
+<ol>
+<li>
+<p>先切换到<code>ragflow-main\docker</code>目录下，输入<code>cd ragflow-main\docker</code></p>
+</li>
+<li>
+<p>拉取镜像并启动服务，输入 <code>docker compose -f docker-compose.yml up -d</code></p>
+</li>
+</ol>
+<p>对应的停止服务命令是：<code>docker compose -f docker-compose.yml down</code>，也可以在 docker desktop 中手动操作启动/停止。</p>
+<p>运行上述命令会自动下载最新的镜像并启动。如果下载失败或网速太慢，更换docker镜像源重新下载。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">PS F:\工作\大模型\ragflow-main\docker&gt; docker compose -f docker-compose.yml up -d</span><br><span class="line"><span class="keyword">time</span>=<span class="string">&quot;2025-04-10T16:28:24+08:00&quot;</span> level=warning msg=<span class="string">&quot;The \&quot;HF_ENDPOINT\&quot; variable is not set. Defaulting to a blank string.&quot;</span></span><br><span class="line"><span class="keyword">time</span>=<span class="string">&quot;2025-04-10T16:28:24+08:00&quot;</span> level=warning msg=<span class="string">&quot;The \&quot;MACOS\&quot; variable is not set. Defaulting to a blank string.&quot;</span></span><br><span class="line">[+] Running 67/67</span><br><span class="line"> ✔ mysql Pulled                                                          217.5s</span><br><span class="line"> ✔ redis Pulled                                                          223.8s</span><br><span class="line"> ✔ ragflow Pulled                                                        334.8s</span><br><span class="line"> ✔ minio Pulled                                                          111.3s</span><br><span class="line"> ✔ es01 Pulled                                                           174.1s</span><br><span class="line">[+] Running 10/10</span><br><span class="line"> ✔ Network docker_ragflow      Created                                     0.4s</span><br><span class="line"> ✔ Volume <span class="string">&quot;docker_minio_data&quot;</span>  Created                                     0.0s</span><br><span class="line"> ✔ Volume <span class="string">&quot;docker_redis_data&quot;</span>  Created                                     0.0s</span><br><span class="line"> ✔ Volume <span class="string">&quot;docker_esdata01&quot;</span>    Created                                     0.0s</span><br><span class="line"> ✔ Volume <span class="string">&quot;docker_mysql_data&quot;</span>  Created                                     0.0s</span><br><span class="line"> ✔ Container ragflow-es-01     Started                                     2.5s</span><br><span class="line"> ✔ Container ragflow-minio     Started                                     2.7s</span><br><span class="line"> ✔ Container ragflow-mysql     Healthy                                    23.0s</span><br><span class="line"> ✔ Container ragflow-redis     Started                                     2.5s</span><br><span class="line"> ✔ Container ragflow-server    Started                                    24.2s</span><br></pre></td></tr></table></figure>
+<p>如果打印出这些信息，说明 Docker Compose 已经成功拉取了所有镜像（<code>mysql</code>、<code>redis</code>、<code>ragflow</code>、<code>minio</code>、<code>es01</code>），并创建了必要的网络和卷，所有容器也已正常启动。可以使用<code>docker logs ragflow-server</code>来查看服务是否正常。</p>
+</li>
+<li>
+<p>如果一切顺利，那么就可以在浏览器中访问Web页面了，在浏览器中输入<code>localhost:80</code>就能到RAGFlow的登录页面：<br>
+<img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/image-20250410164148063.png" alt="image-20250410164148063|500"></p>
+<p>默认的首页地址是<code>部署主机ip:80</code>，默认端口可以在docker-compose.yml文件中修改。</p>
+</li>
+</ol>
+<h2 id="RAGFlow的使用">RAGFlow的使用</h2>
+<p>部署成功以后，我们就可以在RAGFlow中构建个人知识库并实现基于个人知识库的问答。</p>
+<h3 id="注册账号">注册账号</h3>
+<p>首次登录，先注册一个账号：</p>
+<p><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/image-20250410170631774.png" alt="image-20250410170631774|500"></p>
+<h3 id="配置LLM">配置LLM</h3>
+<p>上面有提到，模型主要分为两种，一种是Chat模型，一种是Embedding模型。下面，我们以添加本地的Ollama模型为例，展示配置过程。</p>
+<ol>
+<li>
+<p>配置模型。</p>
+<p>在cmd中查看本地Ollama的模型列表：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">PS F:\工作\大模型\ragflow-main\docker&gt; ollama list</span><br><span class="line">NAME                   ID              SIZE      MODIFIED</span><br><span class="line">qwen2.5-coder:7b       2b0496514337    4.7 GB    23 hours ago</span><br><span class="line">deepseek-coder:6.7b    ce298d984115    3.8 GB    23 hours ago</span><br><span class="line">qwen2.5-coder:3b       e7149271c296    1.9 GB    23 hours ago</span><br><span class="line">deepseek-r1:latest     0a8c26691023    4.7 GB    30 hours ago</span><br><span class="line">deepseek-r1:1.5b       a42b25d8c10a    1.1 GB    31 hours ago</span><br></pre></td></tr></table></figure>
+<p>复制模型的完整NAME，比如我打算配置 deepseek-r1:1.5b 为chat模型。</p>
+<p>在Web页面上点击头像，点击左侧模型提供商，选择Ollama，点击添加模型：</p>
+</li>
+</ol>
+<p><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/image-20250410173033645.png" alt="image-20250410173033645|500"></p>
+<p><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/image-20250410173443563.png" alt="image-20250410173443563|500"></p>
+<p>模型类型要和你配置的模型匹配，这里选择chat，选择提前下载好的deepseek-r1:1.5b，因为我们的Ollama是部署在本地的，所以这里填本地的ipv4地址（可以使用<code>ipconfig</code>在cmd中查看)，端口就是Ollama默认的11434端口。我们前面配置了Ollama的环境变量，这样RAGFlow就能正常访问到Ollama了。最大token数，因为我们是本地的模型，无所谓随便填一个就行。</p>
+<ol start="2">
+<li>成功添加以后，我们点击<strong>系统模型设置</strong>，选择默认模型：</li>
+</ol>
+<p><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/image-20250410174725590.png" alt="image-20250410174725590|500"></p>
+<p><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/image-20250410174908728.png" alt="image-20250410174908728|500"></p>
+<p>嵌入模型提供数据表示，Img2txt和Sequence2txt模型生成文本，Rerank模型优化结果，聊天模型生成最终回复，TTS模型将文本转为语音。我们目前先配置聊天模型和嵌入模型，这是最重要的两个。其余的有空再说。</p>
+<ol start="3">
+<li>
+<p>新建知识库。</p>
+<p><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/image-20250410175447648.png" alt="image-20250410175447648"></p>
+<p>简单配置以后，点击保存。</p>
+</li>
+<li>
+<p>添加文件。单击 + 新增文件 <strong>&gt;</strong> <strong>本地文件</strong>开始将特定文件上传到知识库。</p>
+</li>
+<li>
+<p>解析文件。点击播放按钮，开始解析文件。如果不进行这一步骤，大模型是无法理解文件的。</p>
+<p><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/image-20250410180316796.png" alt="image-20250410180316796"></p>
+</li>
+<li>
+<p>创建知识库并完成文件解析后，即可开始 AI 对话。单击图像中间顶部的<strong>聊天选项卡****&gt;</strong> <strong>创建助手</strong>以显示<em>下一个对话的</em><strong>聊天配置</strong>对话框。</p>
+<p><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/image-20250410183744986.png" alt="image-20250410183744986|1088"></p>
+<p>这里的空响应的意思是，如果大模型在知识库中完全找不到相关的内容，统一按照你在此处设置的内容进行回复。如果你希望 RAGFlow 在无法从知识库中检索到答案时进行<em><strong>即兴发挥</strong></em>，将其留空即可，但这可能会产生AI幻觉。</p>
+</li>
+<li>
+<p>助理配置好以后，就可以和助理进行聊天了。助手会结合知识库的内容进行回答，并给出具体的引用：</p>
+<p><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/image-20250410183912707.png" alt="image-20250410183912707"></p>
+</li>
+</ol>
+<p>RAGFlow 还提供 HTTP 和 Python API，方便您将 RAGFlow 的功能集成到您的应用程序中。</p>
+<h2 id="RAGFlow-Agent">RAGFlow Agent</h2>
+<h1 id="vLLM">vLLM</h1>
+<h2 id="vLLM和Ollama的区别？">vLLM和Ollama的区别？</h2>
+<p>vLLM 和 Ollama 是两种流行的大型语言模型（LLM）部署工具，各自适用于不同的场景。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left"><strong>指标</strong></th>
+<th style="text-align:left"><strong>Ollama</strong></th>
+<th style="text-align:left"><strong>vLLM</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>推理速度</strong></td>
+<td style="text-align:left">较慢（适合本地小规模使用）</td>
+<td style="text-align:left">极快（支持连续批处理、多 GPU 并行）</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>内存占用</strong></td>
+<td style="text-align:left">较低（适合消费级硬件）</td>
+<td style="text-align:left">较高（优化显存管理，但仍需高端 GPU）</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>并发能力</strong></td>
+<td style="text-align:left">有限（单机部署，并发请求性能较弱）</td>
+<td style="text-align:left">高（支持分布式推理，适合大规模服务）</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>易用性</strong></td>
+<td style="text-align:left">安装简单，开箱即用</td>
+<td style="text-align:left">配置较为复杂，适合有技术背景的团队</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>成本</strong></td>
+<td style="text-align:left">低</td>
+<td style="text-align:left">高</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>使用场景</strong></td>
+<td style="text-align:left">个人开发者、小型项目、离线应用（如本地文档分析、个人助手）</td>
+<td style="text-align:left">企业级 AI 服务（如智能客服、搜索引擎），需要高吞吐量、低延迟推理的场景</td>
+</tr>
+</tbody>
+</table>
+<h1 id="Dify">Dify</h1>
+<p>Dify 官方的云服务，无需自己部署即可使用 Dify 的完整功能： <a target="_blank" rel="noopener" href="https://cloud.dify.ai/apps">https://cloud.dify.ai/apps</a></p>
+<h2 id="Dify-的安装">Dify 的安装</h2>
+<blockquote>
+<p>[!warning] 安装 Dify 之前, 请确保你的机器已满足最低安装要求：</p>
+<ul>
+<li>
+<p>CPU &gt;= 2 Core</p>
+</li>
+<li>
+<p>RAM &gt;= 4 GiB</p>
+</li>
+</ul>
+</blockquote>
+<p>Docker Compose 部署教程： <a target="_blank" rel="noopener" href="https://docs.dify.ai/zh-hans/getting-started/install-self-hosted/docker-compose">https://docs.dify.ai/zh-hans/getting-started/install-self-hosted/docker-compose</a></p>
+<p>github 主页： <a target="_blank" rel="noopener" href="https://github.com/langgenius/dify">https://github.com/langgenius/dify</a></p>
+<ol>
+<li>
+<p>从 github 下载源码到本地，可以使用 git，也可以直接下载 zip。</p>
+</li>
+<li>
+<p>下载解压后，进入 docker 目录下，然后复制一份 <code>.env.example</code>，把 <code>.example</code> 后缀删掉，得到一份 <code>.env</code> 文件。也可以直接使用命令行：</p>
+ <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd dify-main/docker</span><br><span class="line">cp .env.example .env</span><br></pre></td></tr></table></figure>
+</li>
+<li>
+<p>在 docker 目录下打开终端，启动 docker 容器：<code>docker compose -p dify up -d</code></p>
+<ol>
+<li>要注意用 <code>-p</code> 指定一个唯一的项目名（如 <code>dify</code>），避免和 RAGFlow 冲突，否则默认的项目名都是 <code>docker</code>。</li>
+<li>或者去修改上面的 <code>.env</code> 文件，修改端口号，默认是 80，然后重新启动。<br>
+<img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/file-20250411152954088.png" alt=""></li>
+</ol>
+</li>
+<li>
+<p>如果没有修改端口号，直接在浏览器中访问 <code>localhost</code> 即可，否则加上端口号 <code>localhost:8800</code>。首次进入时会要求注册管理员：<img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/file-20250411154041714.png" alt="|500"></p>
+</li>
+</ol>
+<h2 id="大模型接入">大模型接入</h2>
+<ol>
+<li>点击头像——设置——模型提供商，找到目标大模型，点击安装：<img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/file-20250411173553623.png" alt="|500"></li>
+<li>安装完成后，在顶部安装成功的模型插件中配置 API：<img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/file-20250411181105310.png" alt="|500"></li>
+</ol>
+<h2 id="插件安装">插件安装</h2>
+<ol>
+<li>在工具标签页，搜索想要的工具，点击安装。<img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/file-20250411183825250.png" alt="|500"></li>
+<li>工具授权。按照指引进行授权。<img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/file-20250411183903824.png" alt=""></li>
+</ol>
+<h2 id="创建应用">创建应用</h2>
+<p>Dify 上可以创建多种不同的应用类型，分别是聊天助手、文本生成应用、Agent 、chatflow、工作流。</p>
+<p>你可以通过 3 种方式在 Dify 的工作室内创建应用：</p>
+<ul>
+<li>
+<p>基于应用模板创建（新手推荐）：选择 「工作室 」，在应用列表内选择 「从模板创建」。</p>
+</li>
+<li>
+<p>创建一个空白应用：选择 「工作室」 ，在应用列表内选择 「从空白创建 」。</p>
+</li>
+<li>
+<p>通过 DSL 文件（本地/在线）创建应用：Dify DSL 是由 <a target="_blank" rel="noopener" href="http://Dify.AI">Dify.AI</a> 所定义的 AI 应用工程文件标准，文件格式为 YML。该标准涵盖应用在 Dify 内的基本描述、模型参数、编排配置等信息。支持本地导入或 URL 导入。</p>
+</li>
+</ul>
+<h2 id="工作流">工作流</h2>
+<p>开源的工作流合集： <a target="_blank" rel="noopener" href="https://github.com/svcvit/Awesome-Dify-Workflow">https://github.com/svcvit/Awesome-Dify-Workflow</a> ，可以通过 DSL 文件导入。</p>
+<ul>
+<li><strong>节点</strong>：节点是工作流的关键构成，通过连接不同功能的节点，执行工作流的一系列操作。</li>
+<li><strong>变量</strong>：变量用于串联工作流内前后节点的输入与输出，实现流程中的复杂处理逻辑，包含<strong>系统变量</strong>、<strong>环境变量</strong>和<strong>会话变量</strong>。</li>
+</ul>
+<h3 id="变量">变量</h3>
+<p>大部分节点设有输入和输出项，但每个节点的输入信息不一致，各个节点所输出的答复也不尽相同。</p>
+<p>变量作为一种动态数据容器，能够存储和传递不固定的内容，在不同的节点内被相互引用，实现信息在节点间的灵活通信。</p>
+<p>系统变量是工作流应用内预设的系统级参数，可以被其它节点全局读取。系统级变量均以 <code>sys</code> 开头。Workflow 类型应用提供以下系统变量：</p>
+<table>
+<thead>
+<tr>
+<th>变量名称</th>
+<th>数据类型</th>
+<th>说明</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>sys.files</td>
+<td>Array[File]</td>
+<td>文件参数，存储用户初始使用应用时上传的图片</td>
+<td>图片上传功能需在应用编辑页面右上角的“功能”处开启</td>
+</tr>
+<tr>
+<td>sys.user_id</td>
+<td>String</td>
+<td>用户 ID，每个用户在使用工作流应用时，系统会自动向用户分配唯一标识符，用以区分不同的对话用户</td>
+<td></td>
+</tr>
+<tr>
+<td>sys.app_id</td>
+<td>String</td>
+<td>应用 ID，系统会向每个 Workflow 应用分配一个唯一的标识符，用以区分不同的应用，并通过此参数记录当前应用的基本信息</td>
+<td>面向具备开发能力的用户，通过此参数区分并定位不同的 Workflow 应用</td>
+</tr>
+<tr>
+<td>sys.workflow_id</td>
+<td>String</td>
+<td>Workflow ID，用于记录当前 Workflow 应用内所包含的所有节点信息</td>
+<td>面向具备开发能力的用户，可以通过此参数追踪并记录 Workflow 内的包含节点信息</td>
+</tr>
+<tr>
+<td>sys.workflow_run_id</td>
+<td>String</td>
+<td>Workflow 应用运行 ID，用于记录 Workflow 应用中的运行情况</td>
+<td>面向具备开发能力的用户，可以通过此参数追踪应用的历次运行情况</td>
+</tr>
+</tbody>
+</table>
+<p><strong>环境变量用于保护工作流内所涉及的敏感信息</strong>，例如运行工作流时所涉及的 API 密钥、数据库密码等。它们被存储在工作流程中，而不是代码中，以便在不同环境中共享。<img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/file-20250417151312786.png" alt="|500"><br>
+支持以下三种数据类型：String 字符串、Number 数字、Secret 密钥。</p>
+<p>环境变量拥有以下特性：</p>
+<ul>
+<li>环境变量可在大部分节点内全局引用；</li>
+<li>环境变量命名不可重复；</li>
+<li>环境变量为只读变量，不可写入。</li>
+</ul>
+<p>工作流不涉及会话变量。</p>
+<h3 id="节点">节点</h3>
+<p><strong>节点是工作流中的关键构成</strong>，通过连接不同功能的节点，执行工作流的一系列操作。</p>
+<p>dify 中的核心节点包括：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://docs.dify.ai/zh-hans/guides/workflow/node/start"><strong>开始（Start）</strong></a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.dify.ai/zh-hans/guides/workflow/node/end"><strong>结束（End）</strong></a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.dify.ai/zh-hans/guides/workflow/node/answer"><strong>回复（Answer）</strong></a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.dify.ai/zh-hans/guides/workflow/node/llm"><strong>大语言模型（LLM）</strong></a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.dify.ai/zh-hans/guides/workflow/node/knowledge-retrieval"><strong>知识检索（Knowledge Retrieval）</strong></a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.dify.ai/zh-hans/guides/workflow/node/question-classifier"><strong>问题分类（Question Classifier）</strong></a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.dify.ai/zh-hans/guides/workflow/node/ifelse"><strong>条件分支（IF/ELSE）</strong></a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.dify.ai/zh-hans/guides/workflow/node/code"><strong>代码执行（Code）</strong></a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.dify.ai/zh-hans/guides/workflow/node/template"><strong>模板转换（Template）</strong></a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.dify.ai/zh-hans/guides/workflow/node/variable-aggregator"><strong>变量聚合（Variable Aggregator）</strong></a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.dify.ai/zh-hans/guides/workflow/node/parameter-extractor"><strong>参数提取器（Parameter Extractor）</strong></a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.dify.ai/zh-hans/guides/workflow/node/iteration"><strong>迭代（Iteration）</strong></a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.dify.ai/zh-hans/guides/workflow/node/http-request"><strong>HTTP 请求（HTTP Request）</strong></a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.dify.ai/zh-hans/guides/workflow/node/tools"><strong>工具（Tools）</strong></a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.dify.ai/zh-hans/guides/workflow/node/variable-assigner"><strong>变量赋值（Variable Assigner）</strong></a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.dify.ai/zh-hans/guides/workflow/node/loop"><strong>循环（Loop）</strong></a></li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://zyw9825.github.io">zyw9825</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://zyw9825.github.io/2025/07/15/%E5%A4%A7%E6%A8%A1%E5%9E%8B/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8/">https://zyw9825.github.io/2025/07/15/%E5%A4%A7%E6%A8%A1%E5%9E%8B/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://zyw9825.github.io" target="_blank">代码手记</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8/">大模型应用</a></div><div class="post-share"><div class="social-share" data-image="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2025/07/11/%E5%8D%95%E7%89%87%E6%9C%BA/FreeRTOS/" title="RTOS学习笔记"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">RTOS学习笔记</div></div><div class="info-2"><div class="info-item-1">FreeRTOS 移植 获取源码 官网地址：https://www.freertos.org/ Github地址：https://github.com/FreeRTOS/FreeRTOS/releases 选择 202212.01 版本下载。 源码结构介绍 下载源码后，顶层目录结构如下（只列出了部分关键目录）：    名称 描述     FreeRTOS/ FreeRTOS 内核   FreeRTOS-Plus/ FreeRTOS 组件，一般我们会选择使用第三方的组件   tools/ 工具   GitHub-FreeRTOS-Home FreeRTOS 的 GitHub 仓库链接   Quick_Start_Guide 快速入门指南官方文档链接   Upgrading-to-FreeRTOS-xxx 升级到指定 FreeRTOS 版本官方文档链接   History.txt FreeRTOS 历史更新记录    FreeRTOS 目录下是 FreeRTOS 的内核，打开后目录如下（只列出了部分关键目录）：    名称 描述     Demo/ FreeRTOS...</div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">zyw9825</div><div class="author-info-description">你且迷这风浪永远二十赶朝暮</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">37</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">29</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">13</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/zyw9825"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/zyw9825" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:zyw_9825@163.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="tencent://AddContact/?fromId=45&amp;fromSubId=1&amp;subcmd=all&amp;uin=765830653&amp;website=www.oicqzone.com" target="_blank" title="添加QQ好友"><i class="fa-brands fa-qq"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%9E%B6%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">大模型架构</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-ollama-%E5%B9%B6%E4%B8%8B%E8%BD%BD%E5%AF%B9%E5%BA%94%E6%A8%A1%E5%9E%8B"><span class="toc-number">2.</span> <span class="toc-text">安装 ollama 并下载对应模型</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#ollama-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-number">2.1.</span> <span class="toc-text">ollama 是什么</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8B%E8%BD%BD%E5%B9%B6%E5%AE%89%E8%A3%85-ollama"><span class="toc-number">2.2.</span> <span class="toc-text">下载并安装 ollama</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8B%E8%BD%BD%E6%9C%AC%E5%9C%B0%E6%A8%A1%E5%9E%8B"><span class="toc-number">2.3.</span> <span class="toc-text">下载本地模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Ollama-%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="toc-number">2.4.</span> <span class="toc-text">Ollama 常用命令</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Ollama-Open-WebUI"><span class="toc-number">2.5.</span> <span class="toc-text">Ollama + Open WebUI</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E-VSCode-%E7%9A%84%E6%9C%AC%E5%9C%B0%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%9C%8D%E5%8A%A1"><span class="toc-number">3.</span> <span class="toc-text">基于 VSCode 的本地大模型服务</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-Cline-%E6%8F%92%E4%BB%B6%E5%B9%B6%E9%85%8D%E7%BD%AE%E5%A4%A7%E6%A8%A1%E5%9E%8B"><span class="toc-number">3.1.</span> <span class="toc-text">安装 Cline 插件并配置大模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE-MCP-%E6%9C%8D%E5%8A%A1"><span class="toc-number">3.2.</span> <span class="toc-text">配置 MCP 服务</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF-MCP-%E6%9C%8D%E5%8A%A1%EF%BC%9F"><span class="toc-number">3.2.1.</span> <span class="toc-text">什么是 MCP 服务？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-nodejs"><span class="toc-number">3.2.2.</span> <span class="toc-text">安装 nodejs</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9C%A8-Cline-%E4%B8%AD%E9%85%8D%E7%BD%AE-MCP-%E6%9C%8D%E5%8A%A1"><span class="toc-number">3.2.3.</span> <span class="toc-text">在 Cline 中配置 MCP 服务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9C%A8-Cline-%E4%B8%AD%E4%BD%BF%E7%94%A8-MCP-%E6%9C%8D%E5%8A%A1"><span class="toc-number">3.2.4.</span> <span class="toc-text">在 Cline 中使用 MCP 服务</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%87%AA%E5%BB%BA-MCP-%E6%9C%8D%E5%8A%A1"><span class="toc-number">4.</span> <span class="toc-text">自建 MCP 服务</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Docker-%E7%9A%84%E5%AE%89%E8%A3%85"><span class="toc-number">5.</span> <span class="toc-text">Docker 的安装</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%90%AD%E5%BB%BA-RAGFlow-%E7%9F%A5%E8%AF%86%E5%BA%93"><span class="toc-number">6.</span> <span class="toc-text">搭建 RAGFlow 知识库</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#RAGFlow-%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="toc-number">6.1.</span> <span class="toc-text">RAGFlow 是什么？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8-RAG-%E6%8A%80%E6%9C%AF%EF%BC%9FRAG-%E5%92%8C%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9F"><span class="toc-number">6.2.</span> <span class="toc-text">为什么要使用 RAG 技术？RAG 和模型微调的区别？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#windows-%E4%B8%8B%E5%AE%89%E8%A3%85-RAGFlow"><span class="toc-number">6.3.</span> <span class="toc-text">windows 下安装 RAGFlow</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#RAGFlow%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="toc-number">6.4.</span> <span class="toc-text">RAGFlow的使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E5%86%8C%E8%B4%A6%E5%8F%B7"><span class="toc-number">6.4.1.</span> <span class="toc-text">注册账号</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AELLM"><span class="toc-number">6.4.2.</span> <span class="toc-text">配置LLM</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#RAGFlow-Agent"><span class="toc-number">6.5.</span> <span class="toc-text">RAGFlow Agent</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#vLLM"><span class="toc-number">7.</span> <span class="toc-text">vLLM</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#vLLM%E5%92%8COllama%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9F"><span class="toc-number">7.1.</span> <span class="toc-text">vLLM和Ollama的区别？</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Dify"><span class="toc-number">8.</span> <span class="toc-text">Dify</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Dify-%E7%9A%84%E5%AE%89%E8%A3%85"><span class="toc-number">8.1.</span> <span class="toc-text">Dify 的安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%8E%A5%E5%85%A5"><span class="toc-number">8.2.</span> <span class="toc-text">大模型接入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8F%92%E4%BB%B6%E5%AE%89%E8%A3%85"><span class="toc-number">8.3.</span> <span class="toc-text">插件安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E5%BA%94%E7%94%A8"><span class="toc-number">8.4.</span> <span class="toc-text">创建应用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E6%B5%81"><span class="toc-number">8.5.</span> <span class="toc-text">工作流</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%98%E9%87%8F"><span class="toc-number">8.5.1.</span> <span class="toc-text">变量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%8A%82%E7%82%B9"><span class="toc-number">8.5.2.</span> <span class="toc-text">节点</span></a></li></ol></li></ol></li></ol></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2023 - 2025 By zyw9825</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.5</a></div><div class="footer_custom_text"><img src="https://haiyong.site/img/icp.png"> <a href="https://beian.miit.gov.cn"  style="color:white" target="_blank">陕ICP备2025066278号-1</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>(async () => {
+  const showKatex = () => {
+    document.querySelectorAll('#article-container .katex').forEach(el => el.classList.add('katex-show'))
+  }
+
+  if (!window.katex_js_css) {
+    window.katex_js_css = true
+    await btf.getCSS('https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css')
+    if (true) {
+      await btf.getScript('https://cdn.jsdelivr.net/npm/katex/dist/contrib/copy-tex.min.js')
+    }
+  }
+
+  showKatex()
+})()</script></div><div class="aplayer no-destroy" data-lrctype="0" data-id="922753585" data-order="random" data-listmaxheight="200px" data-theme="#2980b9" data-server="netease" data-type="playlist" data-fixed="true" data-autoplay="true"> </div><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-fluttering-ribbon.min.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/metingjs/dist/Meting.min.js"></script><script>(() => {
+  const destroyAplayer = () => {
+    if (window.aplayers) {
+      for (let i = 0; i < window.aplayers.length; i++) {
+        if (!window.aplayers[i].options.fixed) {
+          window.aplayers[i].destroy()
+        }
+      }
+    }
+  }
+
+  const runMetingJS = () => {
+    typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+  }
+
+  btf.addGlobalFn('pjaxSend', destroyAplayer, 'destroyAplayer')
+  btf.addGlobalFn('pjaxComplete', loadMeting, 'runMetingJS')
+})()</script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>(() => {
+  const pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => fn())
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      const usePjax = true
+      false 
+        ? (usePjax ? pjax.loadUrl('/404.html') : window.location.href = '/404.html')
+        : window.location.href = e.request.responseURL
+    }
+  })
+})()</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

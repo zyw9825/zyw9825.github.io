@@ -1,0 +1,408 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>OSTEP-2多处理器编程.md | 代码手记</title><meta name="author" content="zyw9825"><meta name="copyright" content="zyw9825"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="课程主页：https:&#x2F;&#x2F;jyywiki.cn&#x2F;OS&#x2F;2024&#x2F;lect5.md   课程视频：https:&#x2F;&#x2F;www.bilibili.com&#x2F;video&#x2F;BV1jx4y1S7cP&#x2F;?spm_id_from&#x3D;333.337.top_right_bar_window_history.content.click&amp;vd_source&#x3D;c37ae10385a4b5aea64d2fa5304f">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OSTEP-2多处理器编程.md">
+<meta property="og:url" content="https://zyw9825.github.io/2023/04/21/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OSTEP-2%E5%A4%9A%E5%A4%84%E7%90%86%E5%99%A8%E7%BC%96%E7%A8%8B/index.html">
+<meta property="og:site_name" content="代码手记">
+<meta property="og:description" content="课程主页：https:&#x2F;&#x2F;jyywiki.cn&#x2F;OS&#x2F;2024&#x2F;lect5.md   课程视频：https:&#x2F;&#x2F;www.bilibili.com&#x2F;video&#x2F;BV1jx4y1S7cP&#x2F;?spm_id_from&#x3D;333.337.top_right_bar_window_history.content.click&amp;vd_source&#x3D;c37ae10385a4b5aea64d2fa5304f">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg">
+<meta property="article:published_time" content="2023-04-21T13:10:13.000Z">
+<meta property="article:modified_time" content="2025-09-27T08:36:32.602Z">
+<meta property="article:author" content="zyw9825">
+<meta property="article:tag" content="操作系统">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "OSTEP-2多处理器编程.md",
+  "url": "https://zyw9825.github.io/2023/04/21/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OSTEP-2%E5%A4%9A%E5%A4%84%E7%90%86%E5%99%A8%E7%BC%96%E7%A8%8B/",
+  "image": "https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg",
+  "datePublished": "2023-04-21T13:10:13.000Z",
+  "dateModified": "2025-09-27T08:36:32.602Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "zyw9825",
+      "url": "https://zyw9825.github.io/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/book.svg"><link rel="canonical" href="https://zyw9825.github.io/2023/04/21/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OSTEP-2%E5%A4%9A%E5%A4%84%E7%90%86%E5%99%A8%E7%BC%96%E7%A8%8B/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?08ead5bb7d005bd4116f0ec90195f830";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+btf.addGlobalFn('pjaxComplete', () => {
+  _hmt.push(['_trackPageview',window.location.pathname])
+}, 'baidu_analytics')
+</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'OSTEP-2多处理器编程.md',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"  media="defer" onload="this.media='all'"><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">37</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">29</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">13</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/shuoshuo/"><i class="fa-fw fas fa-comments"></i><span> 说说</span></a></div><div class="menus_item"><a class="site-page" href="/message/"><i class="fa-fw far fa-comment"></i><span> 留言板</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/11ps.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">代码手记</span></a><a class="nav-page-title" href="/"><span class="site-name">OSTEP-2多处理器编程.md</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/shuoshuo/"><i class="fa-fw fas fa-comments"></i><span> 说说</span></a></div><div class="menus_item"><a class="site-page" href="/message/"><i class="fa-fw far fa-comment"></i><span> 留言板</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">OSTEP-2多处理器编程.md</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-04-21T13:10:13.000Z" title="发表于 2023-04-21 21:10:13">2023-04-21</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-09-27T08:36:32.602Z" title="更新于 2025-09-27 16:36:32">2025-09-27</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AF%BC%E8%AE%BAOSTEP/">操作系统导论OSTEP</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">2.9k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>11分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><ul>
+<li>
+<p>课程主页：<a target="_blank" rel="noopener" href="https://jyywiki.cn/OS/2024/lect5.md">https://jyywiki.cn/OS/2024/lect5.md</a></p>
+</li>
+<li>
+<p>课程视频：<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1jx4y1S7cP/?spm_id_from=333.337.top_right_bar_window_history.content.click&amp;vd_source=c37ae10385a4b5aea64d2fa5304fd017">https://www.bilibili.com/video/BV1jx4y1S7cP/?spm_id_from=333.337.top_right_bar_window_history.content.click&amp;vd_source=c37ae10385a4b5aea64d2fa5304fd017</a></p>
+</li>
+<li>
+<p>课后习题</p>
+<p><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/img/image-20240407125144842.png" alt="image-20240407125144842"></p>
+</li>
+</ul>
+<h1 id="多处理器编程入门">多处理器编程入门</h1>
+<h2 id="多线程编程模型">多线程编程模型</h2>
+<p>多线程 = 多个共享内存的状态机：</p>
+<ul>
+<li>C语言状态机的多个线程
+<ul>
+<li>共享所有全局变量</li>
+<li>独立的栈帧列表</li>
+</ul>
+</li>
+<li>汇编语言状态机的多个线程
+<ul>
+<li>共享一个地址空间</li>
+<li>独立的寄存器（SP指向不同内存位置）</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p><strong>Stack Pointer（堆栈指针）</strong>：在计算机体系结构中，SP 通常代表堆栈指针。堆栈指针是一个<strong>寄存器</strong>，用于指示堆栈中当前顶部的位置。在程序执行过程中，函数调用、局部变量和其他数据都会被存储在堆栈中，堆栈指针用于跟踪堆栈中数据的位置。</p>
+</blockquote>
+<ul>
+<li><strong>状态迁移</strong>：选择任意一个线程执行一步</li>
+</ul>
+<h2 id="简化的线程API-thread-h">简化的线程API(thread.h)</h2>
+<ul>
+<li>
+<pre><code class="language-c">spawn(fn)
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">  - 创建一个入口函数是`fn`的线程，并立即开始执行。</span><br><span class="line">    - `void fn(int tid) &#123; ... &#125;`，tid指示当前线程的编号；</span><br><span class="line">    - 参数 `tid` 从 1 开始编号。</span><br><span class="line">  - 行为：`sys_spawn(fn, tid)`，建新的进程或线程，并执行指定的函数。</span><br><span class="line"></span><br><span class="line">- ```c</span><br><span class="line">  join()</span><br></pre></td></tr></table></figure>
+
+- 等待所有运行线程的返回 (也可以不调用)；
+- 行为：`while (done != T) sys_sched()`，在变量 `done` 不等于目标值 `T` 时，持续调用系统调度函数。sys_sched() 函数负责在系统中进行任务调度，以确保系统中的任务或线程得到适当的执行。
+
+</code></pre>
+</li>
+</ul>
+<h2 id="最小线程库">最小线程库</h2>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget -r -np -nH --cut-dirs=2 -R <span class="string">&quot;index.html*&quot;</span> <span class="string">&quot;https://jyywiki.cn/os-demos/concurrency/thread-lib/&quot;</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在这个 “最简” 的线程库中，我们封装了 POSIX 线程库，提供了线程管理的 API：<code>create(fn)</code> 创建一个新线程，执行函数 <code>fn</code>；<code>join()</code> 等待当前运行的线程结束。使用这两个 API，我们就可以利用系统中的多处理器资源了：线程可以被同时调度到不同的处理器上并行执行。</p>
+</blockquote>
+<ul>
+<li>
+<p>hello.c</p>
+  <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;thread.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">T_a</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;a&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">T_b</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;b&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    create(T_a);</span><br><span class="line">    create(T_b);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li>
+<p>thread.h</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;assert.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> LENGTH(arr) (sizeof(arr) / sizeof(arr[0]))</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">enum</span> &#123;</span></span><br><span class="line">    T_FREE = <span class="number">0</span>, <span class="comment">// This slot is not used yet.</span></span><br><span class="line">    T_LIVE,     <span class="comment">// This thread is running.</span></span><br><span class="line">    T_DEAD,     <span class="comment">// This thread has terminated.</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">thread</span> &#123;</span></span><br><span class="line">    <span class="type">int</span> id;  <span class="comment">// Thread number: 1, 2, ...</span></span><br><span class="line">    <span class="type">int</span> status;  <span class="comment">// Thread status: FREE/LIVE/DEAD</span></span><br><span class="line">    <span class="type">pthread_t</span> thread;  <span class="comment">// Thread struct</span></span><br><span class="line">    <span class="type">void</span> (*entry)(<span class="type">int</span>);  <span class="comment">// Entry point</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">thread</span> <span class="title">threads_</span>[4096];</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> n_ = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// This is the entry for a created POSIX thread. It &quot;wraps&quot;</span></span><br><span class="line"><span class="comment">// the function call of entry(id) to be compatible to the</span></span><br><span class="line"><span class="comment">// pthread library&#x27;s requirements: a thread takes a void *</span></span><br><span class="line"><span class="comment">// pointer as argument, and returns a pointer.</span></span><br><span class="line"><span class="type">static</span> <span class="keyword">inline</span></span><br><span class="line"><span class="type">void</span> *<span class="title function_">wrapper_</span><span class="params">(<span class="type">void</span> *arg)</span> &#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">thread</span> *<span class="title">t</span> =</span> (<span class="keyword">struct</span> thread *)arg;</span><br><span class="line">    t-&gt;entry(t-&gt;id);</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Create a thread that calls function fn. fn takes an integer</span></span><br><span class="line"><span class="comment">// thread id as input argument.</span></span><br><span class="line"><span class="type">static</span> <span class="keyword">inline</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">create</span><span class="params">(<span class="type">void</span> *fn)</span> &#123;</span><br><span class="line">    assert(n_ &lt; LENGTH(threads_));</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Yes, we have resource leak here!</span></span><br><span class="line">    threads_[n_] = (<span class="keyword">struct</span> thread) &#123;</span><br><span class="line">        .id = n_ + <span class="number">1</span>,</span><br><span class="line">        .status = T_LIVE,</span><br><span class="line">        .entry = fn,</span><br><span class="line">    &#125;;</span><br><span class="line">    pthread_create(</span><br><span class="line">        &amp;(threads_[n_].thread),  <span class="comment">// a pthread_t</span></span><br><span class="line">        <span class="literal">NULL</span>,  <span class="comment">// options; all to default</span></span><br><span class="line">        wrapper_,  <span class="comment">// the wrapper function</span></span><br><span class="line">        &amp;threads_[n_] <span class="comment">// the argument to the wrapper</span></span><br><span class="line">    );</span><br><span class="line">    n_++;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Wait until all threads return.</span></span><br><span class="line"><span class="type">static</span> <span class="keyword">inline</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">join</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; LENGTH(threads_); i++) &#123;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">thread</span> *<span class="title">t</span> =</span> &amp;threads_[i];</span><br><span class="line">        <span class="keyword">if</span> (t-&gt;status == T_LIVE) &#123;</span><br><span class="line">            pthread_join(t-&gt;thread, <span class="literal">NULL</span>);</span><br><span class="line">            t-&gt;status = T_DEAD;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Join all threads when main() returns.</span></span><br><span class="line">__attribute__((destructor))</span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">cleanup</span><span class="params">()</span> &#123;</span><br><span class="line">    join();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<hr>
+<p>编译并运行hello.c，就会看到 <code>printf(&quot;a&quot;);</code> 和<code> printf(&quot;b&quot;);</code>交替执行，实现多处理器的利用。</p>
+<ul>
+<li>操作系统会自动把线程放置在不同的处理器上</li>
+<li>CPU 使用率超过了 100%</li>
+</ul>
+<blockquote>
+<p>如果一个程序使用了多个 CPU 核心或线程，并且每个核心或线程的使用率都达到了 100%，那么系统的总 CPU 使用率就会超过 100%。这种情况下，系统的实际 CPU 利用率是各核心或线程利用率之和。</p>
+</blockquote>
+<h2 id="关于线程的疑问和解答">关于线程的疑问和解答</h2>
+<p>获取原码：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget -r -np -nH --cut-dirs=2 -R <span class="string">&quot;index.html*&quot;</span> <span class="string">&quot;https://jyywiki.cn/os-demos/concurrency/thread-qa/&quot;</span></span><br></pre></td></tr></table></figure>
+<hr>
+<ol>
+<li>
+<p><code>T_a</code> 和 <code>T_b</code> 真的共享内存吗？如何证明/否证这件事？</p>
+<p>设置一个全局变量，在不同的线程操作并访问：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ------ Memory.c ------</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;thread.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// We claim that n is shared among threads.</span></span><br><span class="line"><span class="type">int</span> n;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">T_hello</span><span class="params">(<span class="type">int</span> id)</span> &#123;</span><br><span class="line">    <span class="comment">// To validate this claim, each thread reads and increments</span></span><br><span class="line">    <span class="comment">// n, and we expect to see different numbers being printed.</span></span><br><span class="line">    <span class="type">int</span> i = n++;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, i);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">        create(T_hello);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li>
+<p>如何证明线程具有独立堆栈 (以及确定堆栈的范围)？输出混乱，应该如何处理？</p>
+<p>创建多个线程，通过递归不断地使线程栈区增长到最大值（直至内存溢出），打印出线程的最大地址。可以发现，POSIX创建线程的默认栈区大小大约是8Mb，当然，这个数可以指定。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ------ stack.c ------</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;thread.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> N 4</span></span><br><span class="line"></span><br><span class="line"><span class="type">char</span> * <span class="keyword">volatile</span> low[N];		<span class="comment">// stack bottom</span></span><br><span class="line"><span class="type">char</span> * <span class="keyword">volatile</span> high[N];	<span class="comment">// stack top</span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">update_range</span><span class="params">(<span class="type">int</span> T, <span class="type">char</span> *ptr)</span> &#123;</span><br><span class="line">    <span class="comment">// We have a witness of thread T accessing stack pointer</span></span><br><span class="line">    <span class="comment">// ptr. So we keep this record.</span></span><br><span class="line">    <span class="keyword">if</span> (ptr &lt; low[T]) &#123;</span><br><span class="line">        low[T] = ptr;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (ptr &gt; high[T]) &#123;</span><br><span class="line">        high[T] = ptr;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">probe</span><span class="params">(<span class="type">int</span> T, <span class="type">int</span> n)</span> &#123;</span><br><span class="line">    <span class="comment">// Local variables are stack-allocated.</span></span><br><span class="line">    <span class="type">char</span> scratch[<span class="number">64</span>];</span><br><span class="line">    update_range(T, scratch);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Stack(T%d) &gt;= %ld KB\n&quot;</span>,</span><br><span class="line">        T, (high[T] - low[T]) / <span class="number">1024</span>);</span><br><span class="line"></span><br><span class="line">    probe(T, n + <span class="number">1</span>); <span class="comment">// Infinite recursion.</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">T_probe</span><span class="params">(<span class="type">int</span> T)</span> &#123;</span><br><span class="line">    T -= <span class="number">1</span>;</span><br><span class="line">    low[T] = (<span class="type">char</span> *)<span class="number">-1</span>;  <span class="comment">// 0xffffffffffffffff</span></span><br><span class="line">    high[T] = (<span class="type">char</span> *)<span class="number">0</span>;  <span class="comment">// 0x0000000000000000</span></span><br><span class="line">    probe(T, <span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="comment">// Disable printf buffering. Try to make more lines being</span></span><br><span class="line">    <span class="comment">// printed, because the program will eventually crash (and</span></span><br><span class="line">    <span class="comment">// all buffered contents are lost).</span></span><br><span class="line">    setbuf(<span class="built_in">stdout</span>, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; N; i++) &#123;</span><br><span class="line">        create(T_probe);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">gcc -O1 -g -I./include -o stack stack.c &amp;&amp; ./stack</span><br><span class="line">……</span><br><span class="line">Stack(T1) &gt;= 7775 KB</span><br><span class="line">Stack(T0) &gt;= 8038 KB</span><br><span class="line">fish: Job 2, <span class="string">&#x27;./stack&#x27;</span> terminated by signal SIGSEGV (Address boundary error)</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h1 id="放弃（1）：状态迁移原子性的假设">放弃（1）：状态迁移原子性的假设</h1>
+<p>当我们谈 “放弃” 时，放弃的并非并发编程，而是要舍弃一些我们之前对单线程顺序程序的理解。</p>
+<p>单线程程序中，我们往往潜意识地假设“世界上只有一个状态机”，除了使用者以外没有其他人可以“干涉”程序的状态。我们自然而然地对程序进行了化简：</p>
+<ul>
+<li>假设程序中没有执行系统调用</li>
+<li>把程序直接简化为一个原子的状态迁移“计算”</li>
+</ul>
+<p>在多线程编程中，因为线程之间共享内存，所以我们习以为常的简化可能会漏掉并发程序可能的行为。</p>
+<ul>
+<li>任何时候，load读到的值可能是别的线程写入的</li>
+</ul>
+<h2 id="山寨支付宝">山寨支付宝</h2>
+<p>由于线程调度可能随时随地发生，人类并不擅长理解它们的行为。与其他的编程语言特性联系在一起，就可能产生糟糕的后果——尤其是在有 undefined behavior 的编程语言 (例如 C/C++) 中，可能导致诸多安全漏洞。</p>
+<p>两个线程并发支付 ¥100 会发生什么 （代码演示）：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ------ alipay.c ------</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;thread.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">unsigned</span> <span class="type">long</span> balance = <span class="number">100</span>;	<span class="comment">// user count</span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">Alipay_withdraw</span><span class="params">(<span class="type">int</span> amt)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (balance &gt;= amt) &#123;</span><br><span class="line">        <span class="comment">// Bugs may only manifest on specific timings. Sometimes</span></span><br><span class="line">        <span class="comment">// we reproduce bugs by inserting sleep()s.</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// usleep(1);</span></span><br><span class="line"></span><br><span class="line">        balance -= amt;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">T_alipay</span><span class="params">()</span> &#123;</span><br><span class="line">    Alipay_withdraw(<span class="number">100</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    create(T_alipay);	<span class="comment">// thread_1</span></span><br><span class="line">    create(T_alipay);	<span class="comment">// thread_2</span></span><br><span class="line">    join();</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;balance = %lu\n&quot;</span>, balance);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里创建了两个线程，它们执行的操作是一样的：访问账户余额，如果余额足够，就扣除100。</p>
+<p>在单线程程序中，并不会有什么问题，但是在多线程中，如果线程1 和线程2 同时访问余额并进行扣款，就可能会引发错误。</p>
+<h2 id="并发1-1">并发1+1</h2>
+<p>如果两个线程，每个线程都执行 <code>N</code> 次 <code>sum++</code>，最终会得到什么结果？即便我们强制使用一条汇编指令完成 <code>sum++</code>，依然无法保证最终得到 <code>2N</code> 的结果。在共享内存上实现并发控制是一个相当困难的问题。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ------ sum.c ------</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;thread.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> N 100000000</span></span><br><span class="line"></span><br><span class="line"><span class="type">long</span> sum = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">T_sum</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; N; i++) &#123;</span><br><span class="line">        sum++;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Won&#x27;t work even if we force a single-instruction</span></span><br><span class="line">        <span class="comment">// increment.</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// asm volatile(</span></span><br><span class="line">        <span class="comment">//     &quot;incq %0&quot; : &quot;+m&quot;(sum)</span></span><br><span class="line">        <span class="comment">// );</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    create(T_sum);</span><br><span class="line">    create(T_sum);</span><br><span class="line"></span><br><span class="line">    join();</span><br><span class="line"></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;sum = %ld\n&quot;</span>, sum);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;2*n = %ld\n&quot;</span>, <span class="number">2L</span> * N);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>正确实现并发 1 + 1 比想象中困难得多：</p>
+<ul>
+<li>1960s，大家争先在共享内存上实现原子性 (互斥)</li>
+<li>但几乎所有的实现都是错的，直到 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Dekker's_algorithm">Dekker’s Algorithm</a>，还只能保证两个线程的互斥</li>
+</ul>
+<h1 id="放弃-2-：程序顺序执行的假设">放弃 (2)：程序顺序执行的假设</h1>
+<p><strong>状态机模型的隐含假设（再一次）</strong>：</p>
+<ul>
+<li>没有其他任何人能 “干涉” 程序的状态</li>
+<li>课堂上常用的简化方法
+<ul>
+<li>假设一段程序执行没有系统调用</li>
+<li>可以直接简化为一个原子的状态迁移 “计算”</li>
+</ul>
+</li>
+</ul>
+<p><strong>编译器也做了同样的假设</strong>：</p>
+<ul>
+<li>编译器会试图优化状态迁移，改变执行流</li>
+</ul>
+<p><strong>共享内存</strong>推翻了编译器的假设：</p>
+<ul>
+<li>但编译器依然会按照顺序执行优化代码</li>
+<li>否则几乎任何涉及共享内存的代码都变得 “不可优化”</li>
+</ul>
+<p><strong>程序的行为在并发编程下变得更难理解了</strong></p>
+<ul>
+<li>“顺序程序” 变得一点也不 “顺序” 了</li>
+</ul>
+<p><strong>并发编程&amp;编译优化下如何控制执行顺序？</strong></p>
+<p>方法 1：插入 “不可优化” 代码</p>
+<ul>
+<li>
+<pre><code>asm volatile (&quot;&quot; ::: &quot;memory&quot;);
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">  - 使用 volatile关键字告诉编译器其他线程可能写入内存</span><br><span class="line"></span><br><span class="line">方法 2：标记变量 load/store 为不可优化</span><br><span class="line"></span><br><span class="line">- 使用 `volatile` 修饰变量</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+  int volatile flag; while (!flag); 
+</code></pre>
+</li>
+</ul>
+<p>即便我们能小心处理其他进程写入的数据，编译器是对并发无感知的——如果编译器假设每个变量的值都可能来自其他线程，那么可做的优化就会变得十分局限。这给理解并发程序行为带来了更大的挑战。</p>
+<p>以上都<strong>不是</strong>《操作系统》课推荐的方法：<strong>加锁</strong>。</p>
+<h1 id="放弃-3-：存在全局指令执行顺序的假设">放弃 (3)：存在全局指令执行顺序的假设</h1>
+<p>我们简化理解多处理器的状态机模型时假设了每次选择一个处理器执行一条指令。</p>
+<p>然而，由于动态指令调度和缓存的共同作用，实际程序的运行结果更可能超出我们的预期。</p>
+<p>即便我们能控制编译器生成的指令，处理器内部还隐藏了一个动态编译器——它和缓存共同作用，最终使并发程序的行为变得更难理解：并发程序执行的结果，甚至可以不是所有执行过指令的某个排列顺序运行的结果！</p>
+<h1 id="Take-away-Messages">Take-away Messages</h1>
+<p>在简化多线程的模型中，并发程序就是 “状态机的集合”，每一步选一个状态机执行一步。然而，真实的系统却因为 “编译器” 的无处不在，使共享内存并发的行为十分复杂。</p>
+<p>不幸的是，人类本质上是物理世界 (宏观时间) 中的 “sequential creature”，因此我们在编程时，我们的直觉也只习惯于单线程的顺序/选择/循环结构，真实多处理器上的并发编程是非常具有挑战性的 “底层技术”。在后续的课程中，我们将会提出若干并发控制技术，使得我们可以在需要的时候避免并发的发生，使并发程序退回到顺序程序，从而使我们能够理解和控制并发。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://zyw9825.github.io">zyw9825</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://zyw9825.github.io/2023/04/21/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OSTEP-2%E5%A4%9A%E5%A4%84%E7%90%86%E5%99%A8%E7%BC%96%E7%A8%8B/">https://zyw9825.github.io/2023/04/21/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OSTEP-2%E5%A4%9A%E5%A4%84%E7%90%86%E5%99%A8%E7%BC%96%E7%A8%8B/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://zyw9825.github.io" target="_blank">代码手记</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a></div><div class="post-share"><div class="social-share" data-image="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2023/04/20/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OSTEP-1%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E4%B8%8A%E7%9A%84%E7%A8%8B%E5%BA%8F/" title="OSTEP-1操作系统上的程序"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">OSTEP-1操作系统上的程序</div></div><div class="info-2"><div class="info-item-1">课程资源  课程名称：《操作系统：设计与实现》（2022）——南京大学蒋炎岩老师   课程网站 课程视频 课程教材 课程作业   读书笔记  范围：  第 1 章：Dialogue 第 2 章：Introduction to Operating Systems    Introduction   当一个程序在运行时到底发生了什么？ 一个正在运行的程序只做一件非常简单的事情——执行指令： 处理器每秒数百万次或上亿次地从内存中获取指令，对其进行解码（即找出这到底是哪条指令），然后执行之（访问内存、检查条件、跳转函数等）。这条指令执行结束后，处理器就继续抓取下一条指令。重复上述过程直到整个程序结束。   什么是操作系统（OS）？ 操作系统是这样一个软件，它负责让程序运行变得更容易（甚至可以让你看起来同时运行很多程序），允许程序共享内存，允许程序与设备交互等等，它使得系统以易于使用的方式正确和有效地运行。 操作系统 OS 早期被称作监督程序（Supervisor）或者主控制程序（Master Control...</div></div></div></a><a class="pagination-related" href="/2023/04/23/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/CSAPP-1%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E6%BC%AB%E6%B8%B8/" title="CSAPP-1计算机系统漫游"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">CSAPP-1计算机系统漫游</div></div><div class="info-2"><div class="info-item-1">课程资源汇总：  CSAPP视频课 课程网址 书籍下载   计算机系统漫游 信息就是位+上下文   hello.c 123456#include &lt;stdio.h&gt;int main()&#123;    printf(&quot;hello, world\n&quot;);    return O;&#125;   hello 程序的生命周期是从一个源程序（或者说源文件）开始的，即程序员通过编译器创建并保存的文本文件 hello.c。  源程序实际上由 0 和 1 组成的比特序列，每 8 位称为一个字节。每个字节表示程序中的某些文本字符。 大部分现代计算机系统都是用 ASCII 标准来表示文本字符，即用唯一的一个单字节大小（8bit）表示的整数来表示每一个字符。 hello.c 程序以字节序列的方式存储在文件中。 像 hello.c 这样只由 ASCII...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/04/20/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OSTEP-1%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E4%B8%8A%E7%9A%84%E7%A8%8B%E5%BA%8F/" title="OSTEP-1操作系统上的程序"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-04-20</div><div class="info-item-2">OSTEP-1操作系统上的程序</div></div><div class="info-2"><div class="info-item-1">课程资源  课程名称：《操作系统：设计与实现》（2022）——南京大学蒋炎岩老师   课程网站 课程视频 课程教材 课程作业   读书笔记  范围：  第 1 章：Dialogue 第 2 章：Introduction to Operating Systems    Introduction   当一个程序在运行时到底发生了什么？ 一个正在运行的程序只做一件非常简单的事情——执行指令： 处理器每秒数百万次或上亿次地从内存中获取指令，对其进行解码（即找出这到底是哪条指令），然后执行之（访问内存、检查条件、跳转函数等）。这条指令执行结束后，处理器就继续抓取下一条指令。重复上述过程直到整个程序结束。   什么是操作系统（OS）？ 操作系统是这样一个软件，它负责让程序运行变得更容易（甚至可以让你看起来同时运行很多程序），允许程序共享内存，允许程序与设备交互等等，它使得系统以易于使用的方式正确和有效地运行。 操作系统 OS 早期被称作监督程序（Supervisor）或者主控制程序（Master Control...</div></div></div></a><a class="pagination-related" href="/2023/04/24/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OSTEP-3%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6%EF%BC%9A%E4%BA%92%E6%96%A5/" title="OSTEP-3并发控制：互斥"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-04-24</div><div class="info-item-2">OSTEP-3并发控制：互斥</div></div><div class="info-2"><div class="info-item-1">操作系统导论26-27-28   多线程之间共享地址空间，从而能够访问相同的数据。   与进程相比，线程之间的上下文切换有一点主要区别：地址空间保持不变（即不需要切换当前使用的页表）。   单线程与多线程的地址空间（主要区别在栈）：    互斥：阻止并发（并行）的发生 多处理器和并发执行推翻了程序顺序执行的基本假设。 互斥：阻止并发、独占访问 状态机视角的互斥：  临界区同时发生时，依然满足执行的原子性 可以把多次状态迁移理解为 “一次大状态迁移”  实现任何共享资源 (内存) 的独占访问： 1234567ATOMIC &#123;        // 状态迁移 (语义) &#125;lock(); // 任意代码 unlock();  [!NOTE] 既然通过互斥使得并发程序退回顺序执行，我们还要并发干什么？ 悲观的 Amdahl’s Law  如果你有 1/k 的代码是不能并行的，那么： T∞&gt;T1kT_{\infty} &gt; \frac{T_1}{k}T∞​&gt;kT1​​ ​ T∞T_{\infty}T∞​...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">zyw9825</div><div class="author-info-description">你且迷这风浪永远二十赶朝暮</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">37</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">29</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">13</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/zyw9825"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/zyw9825" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:zyw_9825@163.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="tencent://AddContact/?fromId=45&amp;fromSubId=1&amp;subcmd=all&amp;uin=765830653&amp;website=www.oicqzone.com" target="_blank" title="添加QQ好友"><i class="fa-brands fa-qq"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%A4%9A%E5%A4%84%E7%90%86%E5%99%A8%E7%BC%96%E7%A8%8B%E5%85%A5%E9%97%A8"><span class="toc-number">1.</span> <span class="toc-text">多处理器编程入门</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.1.</span> <span class="toc-text">多线程编程模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%80%E5%8C%96%E7%9A%84%E7%BA%BF%E7%A8%8BAPI-thread-h"><span class="toc-number">1.2.</span> <span class="toc-text">简化的线程API(thread.h)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%80%E5%B0%8F%E7%BA%BF%E7%A8%8B%E5%BA%93"><span class="toc-number">1.3.</span> <span class="toc-text">最小线程库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B3%E4%BA%8E%E7%BA%BF%E7%A8%8B%E7%9A%84%E7%96%91%E9%97%AE%E5%92%8C%E8%A7%A3%E7%AD%94"><span class="toc-number">1.4.</span> <span class="toc-text">关于线程的疑问和解答</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%94%BE%E5%BC%83%EF%BC%881%EF%BC%89%EF%BC%9A%E7%8A%B6%E6%80%81%E8%BF%81%E7%A7%BB%E5%8E%9F%E5%AD%90%E6%80%A7%E7%9A%84%E5%81%87%E8%AE%BE"><span class="toc-number">2.</span> <span class="toc-text">放弃（1）：状态迁移原子性的假设</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B1%B1%E5%AF%A8%E6%94%AF%E4%BB%98%E5%AE%9D"><span class="toc-number">2.1.</span> <span class="toc-text">山寨支付宝</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B9%B6%E5%8F%911-1"><span class="toc-number">2.2.</span> <span class="toc-text">并发1+1</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%94%BE%E5%BC%83-2-%EF%BC%9A%E7%A8%8B%E5%BA%8F%E9%A1%BA%E5%BA%8F%E6%89%A7%E8%A1%8C%E7%9A%84%E5%81%87%E8%AE%BE"><span class="toc-number">3.</span> <span class="toc-text">放弃 (2)：程序顺序执行的假设</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%94%BE%E5%BC%83-3-%EF%BC%9A%E5%AD%98%E5%9C%A8%E5%85%A8%E5%B1%80%E6%8C%87%E4%BB%A4%E6%89%A7%E8%A1%8C%E9%A1%BA%E5%BA%8F%E7%9A%84%E5%81%87%E8%AE%BE"><span class="toc-number">4.</span> <span class="toc-text">放弃 (3)：存在全局指令执行顺序的假设</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Take-away-Messages"><span class="toc-number">5.</span> <span class="toc-text">Take-away Messages</span></a></li></ol></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2023 - 2025 By zyw9825</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.5</a></div><div class="footer_custom_text"><img src="https://haiyong.site/img/icp.png"> <a href="https://beian.miit.gov.cn"  style="color:white" target="_blank">陕ICP备2025066278号-1</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>(async () => {
+  const showKatex = () => {
+    document.querySelectorAll('#article-container .katex').forEach(el => el.classList.add('katex-show'))
+  }
+
+  if (!window.katex_js_css) {
+    window.katex_js_css = true
+    await btf.getCSS('https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css')
+    if (true) {
+      await btf.getScript('https://cdn.jsdelivr.net/npm/katex/dist/contrib/copy-tex.min.js')
+    }
+  }
+
+  showKatex()
+})()</script></div><div class="aplayer no-destroy" data-lrctype="0" data-id="922753585" data-order="random" data-listmaxheight="200px" data-theme="#2980b9" data-server="netease" data-type="playlist" data-fixed="true" data-autoplay="true"> </div><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-fluttering-ribbon.min.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/metingjs/dist/Meting.min.js"></script><script>(() => {
+  const destroyAplayer = () => {
+    if (window.aplayers) {
+      for (let i = 0; i < window.aplayers.length; i++) {
+        if (!window.aplayers[i].options.fixed) {
+          window.aplayers[i].destroy()
+        }
+      }
+    }
+  }
+
+  const runMetingJS = () => {
+    typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+  }
+
+  btf.addGlobalFn('pjaxSend', destroyAplayer, 'destroyAplayer')
+  btf.addGlobalFn('pjaxComplete', loadMeting, 'runMetingJS')
+})()</script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>(() => {
+  const pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => fn())
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      const usePjax = true
+      false 
+        ? (usePjax ? pjax.loadUrl('/404.html') : window.location.href = '/404.html')
+        : window.location.href = e.request.responseURL
+    }
+  })
+})()</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

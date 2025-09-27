@@ -1,0 +1,1045 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Qt Charts 快速入门 | 代码手记</title><meta name="author" content="zyw9825"><meta name="copyright" content="zyw9825"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="原书基于 Qt6.2 讲解，本文示例为 PyQt5，版本为 5.15，故 API 有部分差异   Qt Charts 快速入门 Qt Charts模块，基于图形&#x2F;视图架构，其核心组件是QChartView（继承自QGraphicsView）和QChart（继承自QGraphicsItem）。 一个简单示例 123456789101112131415161718192021222324252627">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Qt Charts 快速入门">
+<meta property="og:url" content="https://zyw9825.github.io/2024/01/11/Qt&PyQt/Qt%20Charts%20%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/index.html">
+<meta property="og:site_name" content="代码手记">
+<meta property="og:description" content="原书基于 Qt6.2 讲解，本文示例为 PyQt5，版本为 5.15，故 API 有部分差异   Qt Charts 快速入门 Qt Charts模块，基于图形&#x2F;视图架构，其核心组件是QChartView（继承自QGraphicsView）和QChart（继承自QGraphicsItem）。 一个简单示例 123456789101112131415161718192021222324252627">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg">
+<meta property="article:published_time" content="2024-01-11T03:29:50.000Z">
+<meta property="article:modified_time" content="2024-01-11T03:31:50.000Z">
+<meta property="article:author" content="zyw9825">
+<meta property="article:tag" content="Qt">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Qt Charts 快速入门",
+  "url": "https://zyw9825.github.io/2024/01/11/Qt&PyQt/Qt%20Charts%20%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/",
+  "image": "https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg",
+  "datePublished": "2024-01-11T03:29:50.000Z",
+  "dateModified": "2024-01-11T03:31:50.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "zyw9825",
+      "url": "https://zyw9825.github.io/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/book.svg"><link rel="canonical" href="https://zyw9825.github.io/2024/01/11/Qt&amp;PyQt/Qt%20Charts%20%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?08ead5bb7d005bd4116f0ec90195f830";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+btf.addGlobalFn('pjaxComplete', () => {
+  _hmt.push(['_trackPageview',window.location.pathname])
+}, 'baidu_analytics')
+</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Qt Charts 快速入门',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"  media="defer" onload="this.media='all'"><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">37</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">29</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">13</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/shuoshuo/"><i class="fa-fw fas fa-comments"></i><span> 说说</span></a></div><div class="menus_item"><a class="site-page" href="/message/"><i class="fa-fw far fa-comment"></i><span> 留言板</span></a></div></div></div></div><div class="post type-note" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/11ps.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">代码手记</span></a><a class="nav-page-title" href="/"><span class="site-name">Qt Charts 快速入门</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/shuoshuo/"><i class="fa-fw fas fa-comments"></i><span> 说说</span></a></div><div class="menus_item"><a class="site-page" href="/message/"><i class="fa-fw far fa-comment"></i><span> 留言板</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Qt Charts 快速入门</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-01-11T03:29:50.000Z" title="发表于 2024-01-11 11:29:50">2024-01-11</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-01-11T03:31:50.000Z" title="更新于 2024-01-11 11:31:50">2024-01-11</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Qt/">Qt</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">5k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>17分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p>原书基于 Qt6.2 讲解，本文示例为 PyQt5，版本为 5.15，故 API 有部分差异</p>
+</blockquote>
+<hr>
+<h1 id="Qt-Charts-快速入门">Qt Charts 快速入门</h1>
+<p>Qt Charts模块，基于图形/视图架构，其核心组件是QChartView（继承自QGraphicsView）和QChart（继承自QGraphicsItem）。</p>
+<h2 id="一个简单示例">一个简单示例</h2>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">@Date    : 2024/5/22 21:15</span></span><br><span class="line"><span class="string">@Author  : zyw9825</span></span><br><span class="line"><span class="string">@Version : 1.0</span></span><br><span class="line"><span class="string">@File    : chart_sin.py</span></span><br><span class="line"><span class="string">@Desc    : 绘制一个 sin 曲线</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> math</span><br><span class="line"><span class="keyword">from</span> PyQt5.QtWidgets <span class="keyword">import</span> QApplication, QMainWindow, QVBoxLayout, QWidget</span><br><span class="line"><span class="keyword">from</span> PyQt5.QtChart <span class="keyword">import</span> QChart, QChartView, QLineSeries, QValueAxis</span><br><span class="line"><span class="keyword">from</span> PyQt5.QtGui <span class="keyword">import</span> QPainter</span><br><span class="line"><span class="keyword">from</span> PyQt5.QtCore <span class="keyword">import</span> Qt, QPointF</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">SinChart</span>(<span class="title class_ inherited__">QMainWindow</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line">        <span class="variable language_">self</span>.initUI()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">initUI</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="comment"># 创建 QChart 对象</span></span><br><span class="line">        chart = QChart()</span><br><span class="line">        <span class="comment"># 创建 QChartView 对象用于显示图表</span></span><br><span class="line">        chart_view = QChartView(chart)</span><br><span class="line">        chart_view.setRenderHint(QPainter.Antialiasing)  <span class="comment"># 抗锯齿</span></span><br><span class="line">        <span class="comment"># 设置 QMainWindow 的中心部件</span></span><br><span class="line">        <span class="variable language_">self</span>.setCentralWidget(chart_view)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 创建一个 QLineSeries 序列对象用于存储数据点</span></span><br><span class="line">        series = QLineSeries()</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 添加数据点到 series 中</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">360</span>):</span><br><span class="line">            x = i</span><br><span class="line">            y = math.sin(math.radians(x))</span><br><span class="line">            series.append(QPointF(x, y))</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 将 series 添加到 chart 中</span></span><br><span class="line">        chart.addSeries(series)</span><br><span class="line">        chart.setTitle(<span class="string">&quot;Sine Function&quot;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 创建坐标轴</span></span><br><span class="line">        axis_x = QValueAxis()</span><br><span class="line">        axis_x.setRange(<span class="number">0</span>, <span class="number">360</span>)</span><br><span class="line">        axis_x.setTitleText(<span class="string">&quot;时间（s）&quot;</span>)</span><br><span class="line">        axis_y = QValueAxis()</span><br><span class="line">        axis_y.setRange(-<span class="number">2</span>, <span class="number">2</span>)</span><br><span class="line">        axis_y.setTitleText(<span class="string">&quot;数值&quot;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 将坐标轴添加到 chart 中</span></span><br><span class="line">        chart.addAxis(axis_x, Qt.AlignBottom)</span><br><span class="line">        chart.addAxis(axis_y, Qt.AlignLeft)</span><br><span class="line">        <span class="comment"># 将 series 与坐标轴关联</span></span><br><span class="line">        series.attachAxis(axis_x)</span><br><span class="line">        series.attachAxis(axis_y)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 设置窗口标题和尺寸</span></span><br><span class="line">        <span class="variable language_">self</span>.setWindowTitle(<span class="string">&#x27;PyQt5 QChart Sine Function&#x27;</span>)</span><br><span class="line">        <span class="variable language_">self</span>.resize(<span class="number">800</span>, <span class="number">600</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    app = QApplication(sys.argv)</span><br><span class="line">    window = SinChart()</span><br><span class="line">    window.show()</span><br><span class="line">    sys.exit(app.exec_())</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>图表的主要组成部分：</p>
+<ol>
+<li>
+<p>QChartView 视图组件</p>
+</li>
+<li>
+<p>QChart 图形项，管理数据序列、坐标轴、图例等绘制图表需要的各种元素</p>
+</li>
+<li>
+<p>Series 序列，数据的展现形式。常见的序列及其继承关系如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">- QObject</span><br><span class="line">  └── QGraphicsItem</span><br><span class="line">        └── QAbstractSeries	所有序列类的上层类</span><br><span class="line">              ├── QXYSeries 曲线序列和散点序列</span><br><span class="line">              │     ├── QLineSeries	折线序列，用于一般曲线显示</span><br><span class="line">              │     ├── QSplineSeries 曲线序列，有平滑处理</span><br><span class="line">              │     ├── QScatterSeries 散点序列</span><br><span class="line">              ├── QAbstractBarSeries 各种柱状图序列</span><br><span class="line">              │		├── QBarSeries 普通柱状图序列</span><br><span class="line">              │     ├── QHorizontalBarSeries 水平柱状图序列</span><br><span class="line">              │     ├── QPercentBarSeries 百分比柱状图序列</span><br><span class="line">              │     ├── QStackedBarSeries 堆叠柱状图序列</span><br><span class="line">              │     ├── QHorizontalPercentBarSeries</span><br><span class="line">              │     └── QHorizontalStackedBarSeries</span><br><span class="line">              ├── QPieSeries 饼图序列</span><br><span class="line">              ├── QCandlestickSeries 蜡烛图（常用于金融分析）</span><br><span class="line">              ├── QBoxPlotSeries 箱线图序列（常用于金融分析）</span><br><span class="line">              └── QAreaSeries 面积图序列（用两个QLineSeries序列曲线作为上界和下界绘制填充的面积图）</span><br></pre></td></tr></table></figure>
+</li>
+<li>
+<p>坐标轴。QAbstractAxis封装了坐标轴的相关数据和属性，比如刻度、标签、网格线、标题等。</p>
+<table>
+<thead>
+<tr>
+<th>类名</th>
+<th>类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>QValueAxis</td>
+<td>数值坐标轴</td>
+<td>作为数值型数据的坐标轴</td>
+</tr>
+<tr>
+<td>QCategoryAxis</td>
+<td>分组数值坐标轴</td>
+<td>可以为数值范围设置文字标签</td>
+</tr>
+<tr>
+<td>QLogValueAxis</td>
+<td>对数坐标轴</td>
+<td>作为数值型数据的对数坐标轴，可以设置对数的底数</td>
+</tr>
+<tr>
+<td>QBarCategoryAxis</td>
+<td>类别坐标轴</td>
+<td>用字符串表示坐标轴的刻度，用于图表的非数值坐标轴</td>
+</tr>
+<tr>
+<td>QDateTimeAxis</td>
+<td>日期时间坐标轴</td>
+<td>作为日期时间数据的坐标轴</td>
+</tr>
+<tr>
+<td>QColorAxis</td>
+<td>颜色坐标轴</td>
+<td>可以用渐变色表示坐标轴的刻度，还可以添加文字标签</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p>图例。QLegend类是封装了图例功能的类，在QChart对象中添加序列后会自动生成图例，可以为每个序列设置图例中的文字，可以控制图例在图表中的位置。当序列发生变化时，QChart会更新图例状态。默认情况下，图例自动附加到图表，但可以将其分离以使其独立于图表布局。图例对象无法创建或删除，可以通过QChart类引用它们。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chart.legend().hide()  <span class="comment"># 隐藏图例</span></span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h2 id="图表各个部分的属性设置">图表各个部分的属性设置</h2>
+<h3 id="QChart的设置">QChart的设置</h3>
+<p>QChart的上层父类是QObject，所以它有属性。一个属性通常有一个设置函数和一个读取函数。</p>
+<table>
+<thead>
+<tr>
+<th>分组</th>
+<th>函数</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>图表</td>
+<td>void setTitle()</td>
+<td>设置图表标题，其显示在图表上方，支持 HTML 格式</td>
+</tr>
+<tr>
+<td>图表</td>
+<td>void setTitleFont()</td>
+<td>设置图表标题字体</td>
+</tr>
+<tr>
+<td>图表</td>
+<td>void setTitleBrush()</td>
+<td>设置图表标题画刷</td>
+</tr>
+<tr>
+<td>外观</td>
+<td>void setTheme()</td>
+<td>设置主题，主题为内置的 UI 设置，定义了图表的配色</td>
+</tr>
+<tr>
+<td>外观</td>
+<td>void setMargins()</td>
+<td>设置绘图区与图表边界的 4 个边距</td>
+</tr>
+<tr>
+<td>外观</td>
+<td>void setPlotArea()</td>
+<td>设置绘图区矩形</td>
+</tr>
+<tr>
+<td>外观</td>
+<td>QLegend *legend()</td>
+<td>返回图表的图例，其是一个 QLegend 类的对象</td>
+</tr>
+<tr>
+<td>外观</td>
+<td>void setAnimationOptions()</td>
+<td>设置序列或坐标轴的动画效果</td>
+</tr>
+<tr>
+<td>外观</td>
+<td>void setAnimationDuration()</td>
+<td>设置动画持续时长</td>
+</tr>
+<tr>
+<td>外观</td>
+<td>void setBackgroundBrush()</td>
+<td>设置图表背景的画刷</td>
+</tr>
+<tr>
+<td>外观</td>
+<td>void setBackgroundPen()</td>
+<td>设置图表背景的画笔</td>
+</tr>
+<tr>
+<td>外观</td>
+<td>void setBackgroundRoundness()</td>
+<td>设置图表背景圆角的直径</td>
+</tr>
+<tr>
+<td>外观</td>
+<td>void setBackgroundVisible()</td>
+<td>设置图表背景是否可见</td>
+</tr>
+<tr>
+<td>外观</td>
+<td>void setPlotAreaBackgroundBrush()</td>
+<td>设置绘图区背景画刷</td>
+</tr>
+<tr>
+<td>外观</td>
+<td>void setPlotAreaBackgroundPen()</td>
+<td>设置绘图区背景画笔</td>
+</tr>
+<tr>
+<td>外观</td>
+<td>void setPlotAreaBackgroundVisible()</td>
+<td>设置绘图区背景是否可见</td>
+</tr>
+<tr>
+<td>数据序列</td>
+<td>void addSeries()</td>
+<td>添加序列</td>
+</tr>
+<tr>
+<td>数据序列</td>
+<td>QList&lt;QAbstractSeries *&gt; series()</td>
+<td>返回图表拥有的序列的列表</td>
+</tr>
+<tr>
+<td>数据序列</td>
+<td>void removeSeries()</td>
+<td>移除一个序列，但并不删除序列对象</td>
+</tr>
+<tr>
+<td>数据序列</td>
+<td>void removeAllSeries()</td>
+<td>移除图表的所有序列并删除序列对象</td>
+</tr>
+<tr>
+<td>坐标轴</td>
+<td>void addAxis()</td>
+<td>为图表的某个方向添加坐标轴</td>
+</tr>
+<tr>
+<td>坐标轴</td>
+<td>QList&lt;QAbstractAxis *&gt; axes()</td>
+<td>返回某个方向的坐标轴列表</td>
+</tr>
+<tr>
+<td>坐标轴</td>
+<td>void removeAxis()</td>
+<td>移除一个坐标轴</td>
+</tr>
+<tr>
+<td>坐标轴</td>
+<td>void createDefaultAxes()</td>
+<td>根据已添加的序列的类型创建默认的坐标轴，已有的坐标轴会被删除</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动画效果和主题">动画效果和主题</h4>
+<p>QChart的函数<code>setAnimationOptions()</code>用于设置图表的动画效果。参数可以是：</p>
+<table>
+<thead>
+<tr>
+<th>Constant</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>QChart::NoAnimation</code></td>
+<td><code>0x0</code></td>
+<td>无动画效果</td>
+</tr>
+<tr>
+<td><code>QChart::GridAxisAnimations</code></td>
+<td><code>0x1</code></td>
+<td>背景网格有动画效果</td>
+</tr>
+<tr>
+<td><code>QChart::SeriesAnimations</code></td>
+<td><code>0x2</code></td>
+<td>序列有动画效果</td>
+</tr>
+<tr>
+<td><code>QChart::AllAnimations</code></td>
+<td><code>0x3</code></td>
+<td>背景和序列都有动画效果</td>
+</tr>
+</tbody>
+</table>
+<p>QChart的函数<code>setTheme()</code>用于设置图表的动画效果。参数可以是：</p>
+<table>
+<thead>
+<tr>
+<th>Constant</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>QChart::ChartThemeLight</code></td>
+<td><code>0</code></td>
+<td>The light theme, which is the default theme.</td>
+</tr>
+<tr>
+<td><code>QChart::ChartThemeBlueCerulean</code></td>
+<td><code>1</code></td>
+<td>The cerulean blue theme.</td>
+</tr>
+<tr>
+<td><code>QChart::ChartThemeDark</code></td>
+<td><code>2</code></td>
+<td>The dark theme.</td>
+</tr>
+<tr>
+<td><code>QChart::ChartThemeBrownSand</code></td>
+<td><code>3</code></td>
+<td>The sand brown theme.</td>
+</tr>
+<tr>
+<td><code>QChart::ChartThemeBlueNcs</code></td>
+<td><code>4</code></td>
+<td>The natural color system (NCS) blue theme.</td>
+</tr>
+<tr>
+<td><code>QChart::ChartThemeHighContrast</code></td>
+<td><code>5</code></td>
+<td>The high contrast theme.</td>
+</tr>
+<tr>
+<td><code>QChart::ChartThemeBlueIcy</code></td>
+<td><code>6</code></td>
+<td>The icy blue theme.</td>
+</tr>
+<tr>
+<td><code>QChart::ChartThemeQt</code></td>
+<td><code>7</code></td>
+<td>The Qt theme.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="QLineSeries序列的设置">QLineSeries序列的设置</h4>
+<p>QLineSeries类的接口函数如下，主要是其父类QXYSeries和间接父类QAbstractSeries中定义的函数。</p>
+<table>
+<thead>
+<tr>
+<th>分组</th>
+<th>函数</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>序列整体</td>
+<td>void setName()</td>
+<td>设置序列的名称，这个名称会显示在图例里，支持 HTML 格式</td>
+</tr>
+<tr>
+<td>序列整体</td>
+<td>QAbstractSeries::SeriesType type</td>
+<td>返回序列的类型，返回值是枚举类型 QAbstractSeries::SeriesType</td>
+</tr>
+<tr>
+<td>序列整体</td>
+<td>void setUseOpenGL()</td>
+<td>设置是否使用 OpenGL 加速</td>
+</tr>
+<tr>
+<td>序列整体</td>
+<td>QChart* chart()</td>
+<td>返回序列所属的图表对象</td>
+</tr>
+<tr>
+<td>序列整体</td>
+<td>void setVisible()</td>
+<td>设置序列是否可见</td>
+</tr>
+<tr>
+<td>序列整体</td>
+<td>bool isVisible()</td>
+<td>判断序列是否可见</td>
+</tr>
+<tr>
+<td>序列整体</td>
+<td>void show()</td>
+<td>显示序列，使序列可见</td>
+</tr>
+<tr>
+<td>序列外观</td>
+<td>void hide()</td>
+<td>隐藏序列，使序列不可见</td>
+</tr>
+<tr>
+<td>序列外观</td>
+<td>void setColor()</td>
+<td>设置序列线条的颜色</td>
+</tr>
+<tr>
+<td>序列外观</td>
+<td>void setPen()</td>
+<td>设置绘制线条的画笔</td>
+</tr>
+<tr>
+<td>序列外观</td>
+<td>void setOpacity()</td>
+<td>设置序列的透明度，0 表示完全透明，1 表示完全不透明</td>
+</tr>
+<tr>
+<td>序列外观</td>
+<td>void setBrush()</td>
+<td>设置绘制数据点的画刷，主要用于设置数据点的填充颜色</td>
+</tr>
+<tr>
+<td>序列外观</td>
+<td>void setMarkerSize()</td>
+<td>设置数据点的大小，默认为 15 像素</td>
+</tr>
+<tr>
+<td>序列外观</td>
+<td>void setLightMarker()</td>
+<td>用一个 QImage 对象作为数据点的显示标记，便于自定义数据点的形状</td>
+</tr>
+<tr>
+<td>序列外观</td>
+<td>void setPointsVisible()</td>
+<td>设置数据点是否可见</td>
+</tr>
+<tr>
+<td>序列外观</td>
+<td>bool pointsVisible()</td>
+<td>判断数据点是否可见</td>
+</tr>
+<tr>
+<td>数据点</td>
+<td>void append()</td>
+<td>添加一个数据点到序列中</td>
+</tr>
+<tr>
+<td>数据点</td>
+<td>void insert()</td>
+<td>在某个位置插入一个数据点</td>
+</tr>
+<tr>
+<td>数据点</td>
+<td>void replace()</td>
+<td>替换某个数据点</td>
+</tr>
+<tr>
+<td>数据点</td>
+<td>void clear()</td>
+<td>清除所有数据点</td>
+</tr>
+<tr>
+<td>数据点</td>
+<td>void remove()</td>
+<td>移除某个数据点</td>
+</tr>
+<tr>
+<td>数据点</td>
+<td>void removePoints()</td>
+<td>从某个位置开始，移除指定个数的数据点</td>
+</tr>
+<tr>
+<td>数据点</td>
+<td>int count()</td>
+<td>返回数据点的个数</td>
+</tr>
+<tr>
+<td>数据点</td>
+<td>QPointF&amp; at()</td>
+<td>返回某个位置的数据点</td>
+</tr>
+<tr>
+<td>数据点</td>
+<td>QList&lt;QPointF&gt; points()</td>
+<td>返回数据点的列表</td>
+</tr>
+<tr>
+<td>数据点选择</td>
+<td>void setPointSelected()</td>
+<td>设置某个序号的数据点的选中状态，即被选中或不被选中</td>
+</tr>
+<tr>
+<td>数据点选择</td>
+<td>bool isPointSelected()</td>
+<td>判断某个数据点是否被选中</td>
+</tr>
+<tr>
+<td>数据点选择</td>
+<td>void toggleSelection()</td>
+<td>切换某些数据点的选中状态</td>
+</tr>
+<tr>
+<td>数据点选择</td>
+<td>void selectAllPoints()</td>
+<td>选中所有数据点</td>
+</tr>
+<tr>
+<td>数据点选择</td>
+<td>void selectPoint()</td>
+<td>选中某个数据点，如果设置了数据点可见，处于选中状态的数据点会以 setSelectedColor() 设置的颜色显示</td>
+</tr>
+<tr>
+<td>数据点选择</td>
+<td>void selectPoints()</td>
+<td>选中某些数据点</td>
+</tr>
+<tr>
+<td>数据点选择</td>
+<td>void deselectAllPoints()</td>
+<td>取消选中所有的数据点</td>
+</tr>
+<tr>
+<td>数据点选择</td>
+<td>void deselectPoint()</td>
+<td>取消选中某个数据点</td>
+</tr>
+<tr>
+<td>数据点选择</td>
+<td>void deselectPoints()</td>
+<td>取消选中某些数据点</td>
+</tr>
+<tr>
+<td>数据点选择</td>
+<td>void setSelectedColor()</td>
+<td>设置被选中的数据点的显示颜色，默认为与序列的颜色相同</td>
+</tr>
+<tr>
+<td>数据点选择</td>
+<td>void setSelectedLightMarker()</td>
+<td>设置一个 QImage 对象为被选中数据点的显示标记</td>
+</tr>
+<tr>
+<td>数据点标签</td>
+<td>void setPointLabelsVisible()</td>
+<td>设置数据点标签的可见性</td>
+</tr>
+<tr>
+<td>数据点标签</td>
+<td>void setPointLabelsColor()</td>
+<td>设置数据点标签的文字颜色</td>
+</tr>
+<tr>
+<td>数据点标签</td>
+<td>void setPointLabelsFont()</td>
+<td>设置数据点标签的字体</td>
+</tr>
+<tr>
+<td>数据点标签</td>
+<td>void setPointLabelsFormat()</td>
+<td>设置数据点标签的格式</td>
+</tr>
+<tr>
+<td>数据点标签</td>
+<td>void setPointLabelsClipping()</td>
+<td>设置数据点标签的裁剪属性，默认值为 true，即绘图区外的标签被裁剪掉</td>
+</tr>
+<tr>
+<td>坐标轴</td>
+<td>bool attachAxis()</td>
+<td>为序列附加一个坐标轴，通常需要一个 x 轴和一个 y 轴</td>
+</tr>
+<tr>
+<td>坐标轴</td>
+<td>bool detachAxis()</td>
+<td>解除一个附加的坐标轴</td>
+</tr>
+<tr>
+<td>坐标轴</td>
+<td>QList&lt;QAbstractAxis *&gt; attachedAxes()</td>
+<td>返回附加的坐标轴的列表</td>
+</tr>
+</tbody>
+</table>
+<p>注意，Qt6.2中增加了许多用于数据点选择和操作的函数，为设计交互式的曲线操作提供了基础，这些函数在Qt5中是没有的。</p>
+<h4 id="QValueAxis坐标轴的设置">QValueAxis坐标轴的设置</h4>
+<p>QValueAxis 和 QLineSeries 序列配合使用就可以绘制一般的数据曲线。QValueAxis类的主要接口函数如下，包括从QAbstractAxis类继承的函数。</p>
+<table>
+<thead>
+<tr>
+<th>分组</th>
+<th>函数</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>坐标轴整体</td>
+<td>void setVisible()</td>
+<td>设置坐标轴可见性</td>
+</tr>
+<tr>
+<td>坐标轴整体</td>
+<td>Qt::Orientation orientation()</td>
+<td>返回坐标轴方向值，有 Qt::Horizontal 和 Qt::Vertical 两种方向值</td>
+</tr>
+<tr>
+<td>坐标轴整体</td>
+<td>void setMin()</td>
+<td>设置坐标轴最小值</td>
+</tr>
+<tr>
+<td>坐标轴整体</td>
+<td>void setMax()</td>
+<td>设置坐标轴最大值</td>
+</tr>
+<tr>
+<td>坐标轴整体</td>
+<td>void setRange()</td>
+<td>设置坐标轴最小值、最大值表示的范围</td>
+</tr>
+<tr>
+<td>坐标轴整体</td>
+<td>void setReverse()</td>
+<td>设置坐标轴是否反向</td>
+</tr>
+<tr>
+<td>坐标轴整体</td>
+<td>void applyNiceNumbers()</td>
+<td>自动设置坐标轴范围和刻度个数</td>
+</tr>
+<tr>
+<td>坐标轴整体</td>
+<td>void setTitleVisible()</td>
+<td>设置轴标题的可见性</td>
+</tr>
+<tr>
+<td>坐标轴整体</td>
+<td>void setTitleText()</td>
+<td>设置轴标题的文字</td>
+</tr>
+<tr>
+<td>轴标题</td>
+<td>void setTitleFont()</td>
+<td>设置轴标题的字体</td>
+</tr>
+<tr>
+<td>轴标题</td>
+<td>void setTitleBrush()</td>
+<td>设置轴标题的画刷</td>
+</tr>
+<tr>
+<td>轴刻度标签</td>
+<td>void setLabelFormat()</td>
+<td>设置轴刻度标签格式，例如可以设置显示的小数点后位数</td>
+</tr>
+<tr>
+<td>轴刻度标签</td>
+<td>void setLabelsAngle()</td>
+<td>设置轴刻度标签的角度，单位为度</td>
+</tr>
+<tr>
+<td>轴刻度标签</td>
+<td>void setLabelsBrush()</td>
+<td>设置轴刻度标签的画刷</td>
+</tr>
+<tr>
+<td>轴刻度标签</td>
+<td>void setLabelsColor()</td>
+<td>设置轴刻度标签的文字颜色</td>
+</tr>
+<tr>
+<td>轴刻度标签</td>
+<td>void setLabelsFont()</td>
+<td>设置轴刻度标签的文字字体</td>
+</tr>
+<tr>
+<td>轴刻度标签</td>
+<td>void setLabelsVisible()</td>
+<td>设置轴刻度标签文字是否可见</td>
+</tr>
+<tr>
+<td>轴刻度标签</td>
+<td>void setLabelsEditable()</td>
+<td>设置轴刻度标签文字是否可以被编辑，如果可以被编辑，用户可以方便地修改坐标轴的范围。这个函数只适用于 QValueAxis 和 QDateTimeAxis</td>
+</tr>
+<tr>
+<td>轴线和主刻度</td>
+<td>void setTickType()</td>
+<td>设置主刻度和标签的定位类型，有固定刻度和动态刻度两种模式</td>
+</tr>
+<tr>
+<td>轴线和主刻度</td>
+<td>void setTickAnchor()</td>
+<td>设置动态刻度的锚点，即动态刻度的起点值</td>
+</tr>
+<tr>
+<td>轴线和主刻度</td>
+<td>void setTickInterval()</td>
+<td>设置动态刻度的间隔值</td>
+</tr>
+<tr>
+<td>轴线和主刻度</td>
+<td>void setTickCount()</td>
+<td>设置坐标轴主刻度的个数，固定刻度模式下有效</td>
+</tr>
+<tr>
+<td>轴线和主刻度</td>
+<td>void setLineVisible()</td>
+<td>设置轴线和主刻度的可见性</td>
+</tr>
+<tr>
+<td>轴线和主刻度</td>
+<td>void setLinePen()</td>
+<td>设置轴线和主刻度的画笔</td>
+</tr>
+<tr>
+<td>轴线和主刻度</td>
+<td>void setLinePenColor()</td>
+<td>设置轴线和主刻度的颜色</td>
+</tr>
+<tr>
+<td>主网格线</td>
+<td>void setGridLineColor()</td>
+<td>设置网格线的颜色</td>
+</tr>
+<tr>
+<td>主网格线</td>
+<td>void setGridLinePen()</td>
+<td>设置网格线的画笔</td>
+</tr>
+<tr>
+<td>主网格线</td>
+<td>void setGridLineVisible()</td>
+<td>设置网格线的可见性</td>
+</tr>
+<tr>
+<td>次刻度和次网格</td>
+<td>void setMinorTickCount()</td>
+<td>设置两个主刻度之间的次刻度的个数</td>
+</tr>
+<tr>
+<td>次网格线</td>
+<td>void setMinorGridLineColor()</td>
+<td>设置次网格线的颜色</td>
+</tr>
+<tr>
+<td>次网格线</td>
+<td>void setMinorGridLinePen()</td>
+<td>设置次网格线的画笔</td>
+</tr>
+<tr>
+<td>次网格线</td>
+<td>void setMinorGridLineVisible()</td>
+<td>设置次网格线的可见性</td>
+</tr>
+</tbody>
+</table>
+<h2 id="图表的交互">图表的交互</h2>
+<h3 id="QChart-和交互相关的接口">QChart 和交互相关的接口</h3>
+<p>QChart有一些接口函数可以实现图表的移动、缩放等操作，还可以实现和QChartView视图进行坐标变换。</p>
+<p>相关接口函数：</p>
+<ul>
+<li><code>OPointF mapToPosition (const QPointF &amp;value,QAbstractSeries *series nullptr)</code>这个方法用于将数据值映射到图表中的位置。它接受一个数据值作为输入，并返回该值在图表中的像素坐标。</li>
+<li><code>OPointF mapTovalue(const QPointF &amp;position,QAbstractSeries *series nullptr)</code>这个方法与 mapToPosition 相反，它将图表中的像素位置映射回对应的数据值。通常，当用户与图表交互（例如点击或拖动）时，可以使用 mapToValue 将鼠标或触摸位置转换为相应的数据值。</li>
+<li><code>void zoom(greal factor)</code>缩放图表，factor大于1时表示放大，factor值为0~1时表示缩小</li>
+<li><code>void zoomIn()</code>放大2倍</li>
+<li><code>void zoomIn(const QRecF &amp;rect)</code> 放大到最大，使得rect表示的矩形范围仍然能被显示</li>
+<li><code>void zoomOut()</code>缩小到原来的一半</li>
+<li><code>void zoomReset()</code> 恢复原始大小</li>
+<li><code>void scroll(qreal dx, qreal dy)</code> 移动图表的可视区域，单位是像素</li>
+</ul>
+<p>为了使用函数 <code>mapToValue() </code>进行坐标变换，我们需要重新实现QChartView组件的事件处理函数<code>mouseMoveEvent()</code>，实时获取屏幕坐标，再通过<code>QChart::mapToValue()</code>函数将其变换为序列数据点坐标。</p>
+<h3 id="QChartView的自动放大功能">QChartView的自动放大功能</h3>
+<p>QChartView有一个函数<code>setRubberBand()</code>可以设置在视图上用鼠标框选时的放大模式：<code>void QChartView::setRubberBand(const QChartView::RubberBands &amp;rubberBand)</code></p>
+<p>RubberBands 有以下几种枚举值：</p>
+<table>
+<thead>
+<tr>
+<th>Constant</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>QChartView::NoRubberBand</code></td>
+<td><code>0x0</code></td>
+<td>不放大</td>
+</tr>
+<tr>
+<td><code>QChartView::VerticalRubberBand</code></td>
+<td><code>0x1</code></td>
+<td>拖动鼠标时，自动绘制一个矩形框，宽度等于整个图的宽度，高度等于鼠标拖动的范围的高度。释放鼠标后，放大显示此矩形框内的内容</td>
+</tr>
+<tr>
+<td><code>QChartView::HorizontalRubberBand</code></td>
+<td><code>0x2</code></td>
+<td>拖动鼠标时，自动绘制一个矩形框，高度等于整个图的高度，宽度等于鼠标拖动的范围的宽度。释放鼠标后，放大显示此矩形框内的内容。</td>
+</tr>
+<tr>
+<td><code>QChartView::RectangleRubberBand</code></td>
+<td><code>0x3</code></td>
+<td>拖动鼠标时，自动绘制一个矩形框，宽度和高度分别等于鼠标拖动的范围的宽度和高度。释放鼠标后，显示效果与VerticalRubberBand模式的基本相同，只是垂直方向放大，没有放大显示框选的矩形框的内容。这应该是Qt6.2的一个bug.</td>
+</tr>
+<tr>
+<td><code>QChartView:ClickThroughRubberBand</code></td>
+<td></td>
+<td>这是一个额外的选项，需要与其他选项进行或运算，再作为函数<code>setRubberBand()</code>的参数。使用这个选项后，鼠标的clicked()信号才会被传递给图表中的序列对象，否则，在自动框选放大模式下，序列接收不到<code>clicked()</code>信号。</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p>在QChartView的父类QGraphics View中有一个函数<code>setDragMode()</code>，用于设置鼠标拖动模式，它的函数原型定义如下：<code>voidQGraphicsview:setDragMode (OGraphicsview:DragMode mode)</code>。参数mode是枚举类型<code>QGraphics View:DragMode</code>，其各种枚举值的作用如下。</p>
+<ul>
+<li><code>QGraphics View:NoDrag</code>:无动作。</li>
+<li><code>QGraphics View:ScrollHandDrag</code>:鼠标光标变成手形，拖动鼠标时会拖动图中的曲线。</li>
+<li><code>QGraphics View:RubberBandDrag</code>:鼠标光标变成十字形，拖动鼠标时会自动绘制一个矩形框。</li>
+</ul>
+<p>函数<code>setDragMode()</code>设置的值不会影响QChartView的自动放大功能，即不管<code>setDragMode()</code>设置的是什么鼠标拖动模式，只要函数<code>setRubberBand()</code>设置的是某种自动放大模式，在拖动鼠标时图表就会放大。</p>
+<h3 id="QXYSeries类的信号">QXYSeries类的信号</h3>
+<p>QLineSeries的父类QXYSeries中定义了很多信号，其中对于交互式操作比较有用的是如下几个信号：</p>
+<table>
+<thead>
+<tr>
+<th>函数</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>void clicked (const OPointF &amp;point)</td>
+<td>点击了曲线</td>
+</tr>
+<tr>
+<td>void doubleclicked(const QPointF &amp;point)</td>
+<td>双击了曲线</td>
+</tr>
+<tr>
+<td>void hovered(const QPointE &amp;point,bool state)</td>
+<td>鼠标光标移入或移出了曲线</td>
+</tr>
+<tr>
+<td>void pressed(const QPointr &amp;point)</td>
+<td>鼠标光标在曲线上，按下了某个鼠标键</td>
+</tr>
+<tr>
+<td>void released(const QPointF &amp;point)</td>
+<td>鼠标光标在曲线上，释放了某个鼠标键</td>
+</tr>
+</tbody>
+</table>
+<p>这些信号都有一个QPointF类型的参数point,它表示信号被发射时曲线上的数据点坐标。这个数据点不一定是构成曲线的原始数据点，而可以是曲线上的任意点。</p>
+<p>信号hovered()在鼠标光标移入曲线上或从曲线上移出时被发射，参数state为true表示鼠标光标移入，为false表示鼠标光标移出。</p>
+<h3 id="自定义图表视图类">自定义图表视图类</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">@Date    : 2024/5/23 1:35</span></span><br><span class="line"><span class="string">@Author  : zyw9825</span></span><br><span class="line"><span class="string">@Version : 1.0</span></span><br><span class="line"><span class="string">@File    : t_chart_view.py</span></span><br><span class="line"><span class="string">@Desc    : QChart和QChartView是基于图形/视图架构的绘图类，要对一个QChart图表进行鼠标操作和按键操作，需要在QChartView组件里对鼠标事件和按键事件进行处理，这就需要自定义一个从QChartView继承的类</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="keyword">from</span> PyQt5.QtChart <span class="keyword">import</span> QChartView</span><br><span class="line"><span class="keyword">from</span> PyQt5.QtCore <span class="keyword">import</span> QPoint, pyqtSignal, Qt, QRectF</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TChartView</span>(<span class="title class_ inherited__">QChartView</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    功能：</span></span><br><span class="line"><span class="string">        1. 矩形放大 or 鼠标拖拽</span></span><br><span class="line"><span class="string">        2. 滚轮放大/缩小</span></span><br><span class="line"><span class="string">        3. 方向键控制视图滚动</span></span><br><span class="line"><span class="string">        4. 鼠标移动时发送鼠标移动信号，参数为当前鼠标位置（像素单位）</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    mouse_move_point_signal = pyqtSignal(QPoint)  <span class="comment"># 鼠标移动信号</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, parent=<span class="literal">None</span></span>):</span><br><span class="line">        <span class="built_in">super</span>(TChartView, <span class="variable language_">self</span>).__init__(parent)</span><br><span class="line"></span><br><span class="line">        <span class="variable language_">self</span>._begin_point: QPoint = <span class="literal">None</span>  <span class="comment"># 选择矩形区域的起点</span></span><br><span class="line">        <span class="variable language_">self</span>._end_point: QPoint = <span class="literal">None</span>  <span class="comment"># 选择矩形区域的终点</span></span><br><span class="line">        <span class="variable language_">self</span>.enable_custom_zoom: <span class="built_in">bool</span> = <span class="literal">False</span>  <span class="comment"># 是否允许自定义缩放</span></span><br><span class="line"></span><br><span class="line">        <span class="variable language_">self</span>.setMouseTracking(<span class="literal">True</span>)  <span class="comment"># 开启鼠标跟踪功能，这样才能捕获鼠标移动事件</span></span><br><span class="line">        <span class="variable language_">self</span>.setDragMode(QChartView.NoDrag)  <span class="comment"># 设置拖动模式，初始化为禁止拖动</span></span><br><span class="line">        <span class="variable language_">self</span>.setRubberBand(QChartView.NoRubberBand)  <span class="comment"># 设置橡皮筋模式，初始化为禁止橡皮筋模式</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">mousePressEvent</span>(<span class="params">self, event</span>):</span><br><span class="line">        <span class="comment"># 鼠标左键按下时，记录起点坐标</span></span><br><span class="line">        <span class="keyword">if</span> event.button() == Qt.LeftButton:</span><br><span class="line">            <span class="variable language_">self</span>._begin_point = event.pos()</span><br><span class="line">        <span class="built_in">super</span>().mousePressEvent(event)  <span class="comment"># 父类继续处理事件</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">mouseReleaseEvent</span>(<span class="params">self, event</span>):</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> event.button() == Qt.LeftButton:</span><br><span class="line">            <span class="comment"># 鼠标左键释放时，记录终点坐标</span></span><br><span class="line">            <span class="variable language_">self</span>._end_point = event.pos()</span><br><span class="line"></span><br><span class="line">            <span class="comment"># 鼠标拖拽</span></span><br><span class="line">            <span class="comment"># 如果鼠标拖动模式为 ScrollHandDrag 且 rubberBand()为 NoRubberBand (不自动放大)，则滚动视图</span></span><br><span class="line">            <span class="keyword">if</span> <span class="variable language_">self</span>.dragMode() == QChartView.ScrollHandDrag <span class="keyword">and</span> <span class="variable language_">self</span>.rubberBand() == QChartView.NoRubberBand:</span><br><span class="line">                <span class="variable language_">self</span>.chart().scroll(<span class="variable language_">self</span>._begin_point.x() - <span class="variable language_">self</span>._end_point.x(),</span><br><span class="line">                                    <span class="variable language_">self</span>._end_point.y() - <span class="variable language_">self</span>._begin_point.y())</span><br><span class="line">            <span class="comment"># 矩形放大</span></span><br><span class="line">            <span class="comment"># 如果鼠标拖动模式为 RubberBandDrag 且 enable_custom_zoom 为 True，则放大视图</span></span><br><span class="line">            <span class="keyword">elif</span> <span class="variable language_">self</span>.enable_custom_zoom <span class="keyword">and</span> <span class="variable language_">self</span>.dragMode() == QChartView.RubberBandDrag:</span><br><span class="line">                rectF = QRectF()</span><br><span class="line">                rectF.setTopLeft(<span class="variable language_">self</span>._begin_point)</span><br><span class="line">                rectF.setBottomRight(<span class="variable language_">self</span>._end_point)</span><br><span class="line">                <span class="variable language_">self</span>.chart().zoomIn(rectF)  <span class="comment"># 按矩形区域放大</span></span><br><span class="line"></span><br><span class="line">        <span class="built_in">super</span>().mousePressEvent(event)  <span class="comment"># 父类继续处理事件</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">mouseMoveEvent</span>(<span class="params">self, event</span>):</span><br><span class="line">        <span class="comment"># 鼠标移动时，发送鼠标移动信号</span></span><br><span class="line">        point = event.pos()</span><br><span class="line">        <span class="variable language_">self</span>.mouse_move_point_signal.emit(point)</span><br><span class="line">        <span class="built_in">super</span>().mouseMoveEvent(event)  <span class="comment"># 父类继续处理事件</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">keyPressEvent</span>(<span class="params">self, event</span>):  <span class="comment"># 按键事件处理</span></span><br><span class="line">        <span class="comment"># 上下左右按键控制视图滚动</span></span><br><span class="line">        <span class="keyword">if</span> event.key() == Qt.Key_Left:</span><br><span class="line">            <span class="variable language_">self</span>.chart().scroll(<span class="number">10</span>, <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">elif</span> event.key() == Qt.Key_Right:</span><br><span class="line">            <span class="variable language_">self</span>.chart().scroll(-<span class="number">10</span>, <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">elif</span> event.key() == Qt.Key_Up:</span><br><span class="line">            <span class="variable language_">self</span>.chart().scroll(<span class="number">0</span>, -<span class="number">10</span>)</span><br><span class="line">        <span class="keyword">elif</span> event.key() == Qt.Key_Down:</span><br><span class="line">            <span class="variable language_">self</span>.chart().scroll(<span class="number">0</span>, <span class="number">10</span>)</span><br><span class="line">        <span class="keyword">elif</span> event.key() == Qt.Key_PageUp:</span><br><span class="line">            <span class="variable language_">self</span>.chart().scroll(<span class="number">0</span>, -<span class="number">50</span>)</span><br><span class="line">        <span class="keyword">elif</span> event.key() == Qt.Key_PageDown:</span><br><span class="line">            <span class="variable language_">self</span>.chart().scroll(<span class="number">0</span>, <span class="number">50</span>)</span><br><span class="line">        <span class="keyword">elif</span> event.key() == Qt.Key_Escape:  <span class="comment"># 按 Esc 键重置视图缩放</span></span><br><span class="line">            <span class="variable language_">self</span>.chart().zoomReset()</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">super</span>().keyPressEvent(event)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">wheelEvent</span>(<span class="params">self, event</span>):</span><br><span class="line">        <span class="comment"># 滚轮事件，放大缩小视图</span></span><br><span class="line">        numDegrees: QPoint = event.angleDelta() / <span class="number">8</span>  <span class="comment"># angleDelta() 是滚轮的相对滚动两，除以 8 得到滚轮转动的度数</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> numDegrees.isNull():</span><br><span class="line">            numSteps = numDegrees / <span class="number">15</span>  <span class="comment"># 计算滚轮转动的步数，每次滚动15度</span></span><br><span class="line">            stepY = numSteps.y()  <span class="comment"># 垂直方向滚轮滚动的步数</span></span><br><span class="line"></span><br><span class="line">            <span class="comment"># 大于0表示放大，小于0表示缩小</span></span><br><span class="line">            <span class="keyword">if</span> stepY &gt; <span class="number">0</span>:</span><br><span class="line">                <span class="variable language_">self</span>.chart().zoom(<span class="number">1.1</span> * stepY)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="variable language_">self</span>.chart().zoom(-<span class="number">0.9</span> * stepY)</span><br><span class="line"></span><br><span class="line">            event.accept()  <span class="comment"># 事件被处理，不向父类传递事件</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://zyw9825.github.io">zyw9825</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://zyw9825.github.io/2024/01/11/Qt&amp;PyQt/Qt%20Charts%20%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/">https://zyw9825.github.io/2024/01/11/Qt&amp;PyQt/Qt%20Charts%20%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://zyw9825.github.io" target="_blank">代码手记</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Qt/">Qt</a></div><div class="post-share"><div class="social-share" data-image="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/01/11/Qt&amp;PyQt/QPainter%E7%BB%98%E5%88%B6%E6%B1%BD%E8%BD%A6%E4%BB%AA%E8%A1%A8%E7%9B%98/" title="QPainter绘制汽车仪表盘"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">QPainter绘制汽车仪表盘</div></div><div class="info-2"><div class="info-item-1">...</div></div></div></a><a class="pagination-related" href="/2024/01/11/Qt&amp;PyQt/Qt%E4%B8%AD%E7%9A%84%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86/" title="Qt中的事件处理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Qt中的事件处理</div></div><div class="info-2"><div class="info-item-1">事件系统 QWidget 类是所有界面组件类的基类，QWidget 类定义了大量与事件处理相关的数据类型和接口函数。 事件的产生与派发 事件的产生 事件表示应用程序中发生的操作或者变化，比如移动鼠标、点击、按键等。在 Qt 中，事件是 QEvent 类及其派生类的实例对象，比如 QKeyEvent 是按键事件类，QMouseEvent 是鼠标事件类。 按照事件的来源，事件可以分为三类：  自生事件：由窗口系统产生。比如 QKeyEvent、QMouseEvent 等。自生事件会进入系统队列，然后被应用程序的事件循环逐个处理。 发布事件：由 Qt 或应用程序产生的事件。比如定时器定时产生的 QTimerEvent 事件，程序调用静态函数 postEvent() 产生的事件。发布事件会进入 Qt 事件队列，然后由应用程序的事件循环进行处理。 发送事件：由 Qt 或应用程序定向发送给某个对象的事件。应用程序调用静态函数 sendEvent() 产生发送事件，由对象的 event() 函数直接处理。   postEvent()...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/01/11/Qt&PyQt/Graphic%20View%E7%BB%98%E5%9B%BE/" title="Graphic View绘图"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-11</div><div class="info-item-2">Graphic View绘图</div></div><div class="info-2"><div class="info-item-1">Graphics View 的构成 Qt 为绘制复杂的可交互图形提供了 Graphics View 绘图架构，是一种基于图形项（Graphics Item）的模型/视图模式，与 Model/View 模式类似。 Graphics View 绘图架构主要由 3 部分组成：场景、视图与图形项。    场景 Scene 场景不可见，是一个抽象的管理图形项的容器。主要有以下功能：  提供管理大量图形项的快速接口 将事件传播到每个图形项 管理每个图形项的状态 管理未经变换的渲染功能，主要用于打印  除了图形项以外，场景还有背景层和前景层，通常由 QBrush 指定，也可以重写 drawBackground() 和 drawForeground() 函数来实现自定义的背景和前景。   视图 View 视图组件用于显示部分场景中的内容，可以为一个场景设置多个视图。在图中，虚线框的部分是一个场景，视图 1 比场景大，显示场景的全部内容。默认情况下：  当视图大于场景时，场景在视图的中间部分显示，也可以设置视图的 Alignment 属性控制场景在视图中的显示位置； 当视图小于场景时（视图...</div></div></div></a><a class="pagination-related" href="/2024/01/11/Qt&PyQt/QPainter%E7%BB%98%E5%88%B6%E6%B1%BD%E8%BD%A6%E4%BB%AA%E8%A1%A8%E7%9B%98/" title="QPainter绘制汽车仪表盘"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-11</div><div class="info-item-2">QPainter绘制汽车仪表盘</div></div><div class="info-2"><div class="info-item-1">...</div></div></div></a><a class="pagination-related" href="/2024/01/11/Qt&PyQt/Qt%E4%B8%AD%E7%9A%84%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86/" title="Qt中的事件处理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-11</div><div class="info-item-2">Qt中的事件处理</div></div><div class="info-2"><div class="info-item-1">事件系统 QWidget 类是所有界面组件类的基类，QWidget 类定义了大量与事件处理相关的数据类型和接口函数。 事件的产生与派发 事件的产生 事件表示应用程序中发生的操作或者变化，比如移动鼠标、点击、按键等。在 Qt 中，事件是 QEvent 类及其派生类的实例对象，比如 QKeyEvent 是按键事件类，QMouseEvent 是鼠标事件类。 按照事件的来源，事件可以分为三类：  自生事件：由窗口系统产生。比如 QKeyEvent、QMouseEvent 等。自生事件会进入系统队列，然后被应用程序的事件循环逐个处理。 发布事件：由 Qt 或应用程序产生的事件。比如定时器定时产生的 QTimerEvent 事件，程序调用静态函数 postEvent() 产生的事件。发布事件会进入 Qt 事件队列，然后由应用程序的事件循环进行处理。 发送事件：由 Qt 或应用程序定向发送给某个对象的事件。应用程序调用静态函数 sendEvent() 产生发送事件，由对象的 event() 函数直接处理。   postEvent()...</div></div></div></a><a class="pagination-related" href="/2024/01/11/Qt&PyQt/%E6%8B%96%E6%94%BE%E4%BA%8B%E4%BB%B6%E4%B8%8E%E6%8B%96%E6%94%BE%E6%93%8D%E4%BD%9C/" title="拖拽事件和拖放操作"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-11</div><div class="info-item-2">拖拽事件和拖放操作</div></div><div class="info-2"><div class="info-item-1">概述 拖放提供了一种简单的可视化机制，用户可使用它在应用程序之间和内部传输信息。 拖放由两个操作组成：拖动（drag）和放置（drop）。被拖动的组件称为拖动点（drag site），接收拖动操作的组件称为放置点（drop site）。  [!NOTE] 拖动点和放置点可以是同一个组件，也可以是不同的组件，甚至可以是不同的应用程序。  整个拖动操作可以分解为两个过程：   拖动点启动拖动操作。 一般情况下，当检测到鼠标左键按下就可以启动拖动操作，可以通过重写被拖动组件的 mousePressEvent() 和 mouseMoveEvent() 函数来启动拖动。 启动操作需要创建一个  QDrag 对象描述拖动操作，以及创建一个 QMimeData 对象用于存储拖动操作的格式信息和数据，然后将该 QMimeData 对象赋值给 QDrag 对象的 mimeData  属性。   放置点处理放置操作。 当拖动点被拖动到放置点范围内时，触发 dragEnterEvent() 事件处理函数，一般在该函数中通过 QDrag 对象的 mimeData...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://blog-img-save.oss-cn-chengdu.aliyuncs.com/bg/BG/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">zyw9825</div><div class="author-info-description">你且迷这风浪永远二十赶朝暮</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">37</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">29</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">13</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/zyw9825"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/zyw9825" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:zyw_9825@163.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="tencent://AddContact/?fromId=45&amp;fromSubId=1&amp;subcmd=all&amp;uin=765830653&amp;website=www.oicqzone.com" target="_blank" title="添加QQ好友"><i class="fa-brands fa-qq"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Qt-Charts-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8"><span class="toc-number">1.</span> <span class="toc-text">Qt Charts 快速入门</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%A4%BA%E4%BE%8B"><span class="toc-number">1.1.</span> <span class="toc-text">一个简单示例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%BE%E8%A1%A8%E5%90%84%E4%B8%AA%E9%83%A8%E5%88%86%E7%9A%84%E5%B1%9E%E6%80%A7%E8%AE%BE%E7%BD%AE"><span class="toc-number">1.2.</span> <span class="toc-text">图表各个部分的属性设置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#QChart%E7%9A%84%E8%AE%BE%E7%BD%AE"><span class="toc-number">1.2.1.</span> <span class="toc-text">QChart的设置</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8A%A8%E7%94%BB%E6%95%88%E6%9E%9C%E5%92%8C%E4%B8%BB%E9%A2%98"><span class="toc-number">1.2.1.1.</span> <span class="toc-text">动画效果和主题</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#QLineSeries%E5%BA%8F%E5%88%97%E7%9A%84%E8%AE%BE%E7%BD%AE"><span class="toc-number">1.2.1.2.</span> <span class="toc-text">QLineSeries序列的设置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#QValueAxis%E5%9D%90%E6%A0%87%E8%BD%B4%E7%9A%84%E8%AE%BE%E7%BD%AE"><span class="toc-number">1.2.1.3.</span> <span class="toc-text">QValueAxis坐标轴的设置</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%BE%E8%A1%A8%E7%9A%84%E4%BA%A4%E4%BA%92"><span class="toc-number">1.3.</span> <span class="toc-text">图表的交互</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#QChart-%E5%92%8C%E4%BA%A4%E4%BA%92%E7%9B%B8%E5%85%B3%E7%9A%84%E6%8E%A5%E5%8F%A3"><span class="toc-number">1.3.1.</span> <span class="toc-text">QChart 和交互相关的接口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#QChartView%E7%9A%84%E8%87%AA%E5%8A%A8%E6%94%BE%E5%A4%A7%E5%8A%9F%E8%83%BD"><span class="toc-number">1.3.2.</span> <span class="toc-text">QChartView的自动放大功能</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#QXYSeries%E7%B1%BB%E7%9A%84%E4%BF%A1%E5%8F%B7"><span class="toc-number">1.3.3.</span> <span class="toc-text">QXYSeries类的信号</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%9B%BE%E8%A1%A8%E8%A7%86%E5%9B%BE%E7%B1%BB"><span class="toc-number">1.3.4.</span> <span class="toc-text">自定义图表视图类</span></a></li></ol></li></ol></li></ol></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2023 - 2025 By zyw9825</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.5</a></div><div class="footer_custom_text"><img src="https://haiyong.site/img/icp.png"> <a href="https://beian.miit.gov.cn"  style="color:white" target="_blank">陕ICP备2025066278号-1</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>(async () => {
+  const showKatex = () => {
+    document.querySelectorAll('#article-container .katex').forEach(el => el.classList.add('katex-show'))
+  }
+
+  if (!window.katex_js_css) {
+    window.katex_js_css = true
+    await btf.getCSS('https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css')
+    if (true) {
+      await btf.getScript('https://cdn.jsdelivr.net/npm/katex/dist/contrib/copy-tex.min.js')
+    }
+  }
+
+  showKatex()
+})()</script></div><div class="aplayer no-destroy" data-lrctype="0" data-id="922753585" data-order="random" data-listmaxheight="200px" data-theme="#2980b9" data-server="netease" data-type="playlist" data-fixed="true" data-autoplay="true"> </div><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-fluttering-ribbon.min.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/metingjs/dist/Meting.min.js"></script><script>(() => {
+  const destroyAplayer = () => {
+    if (window.aplayers) {
+      for (let i = 0; i < window.aplayers.length; i++) {
+        if (!window.aplayers[i].options.fixed) {
+          window.aplayers[i].destroy()
+        }
+      }
+    }
+  }
+
+  const runMetingJS = () => {
+    typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+  }
+
+  btf.addGlobalFn('pjaxSend', destroyAplayer, 'destroyAplayer')
+  btf.addGlobalFn('pjaxComplete', loadMeting, 'runMetingJS')
+})()</script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>(() => {
+  const pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => fn())
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      const usePjax = true
+      false 
+        ? (usePjax ? pjax.loadUrl('/404.html') : window.location.href = '/404.html')
+        : window.location.href = e.request.responseURL
+    }
+  })
+})()</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
